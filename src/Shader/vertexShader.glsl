@@ -1,15 +1,21 @@
 #version 420
 
-layout (location = 0) in vec3 vPosition ;
-layout (location = 1) in vec3 vNormal ;		
+layout (location = 0) in vec4 vPosition ;
+layout (location = 1) in vec4 vNormal ;		
 layout (location = 2) in vec4 vColor ;
-layout (location = 3) in vec2 vTextureUV;
+layout (location = 3) in vec4 vUVx2;
+layout (location = 4) in vec4 vTangent;
+layout (location = 5) in vec4 vBiNormal;
+layout (location = 6) in vec4 vBoneID;
+layout (location = 7) in vec4 vBoneWeight;
 
 // Going "out" to the fragment shader
 out vec4 fColor;		
 out vec4 fNormal;
 out vec4 fVertWorldLocation;	// using only matModel
-out vec2 fTextureUV;
+out vec4 fUVx2;
+out vec4 fTangent;
+out vec4 fBinormal;
 
 //uniform
 uniform mat4 mModel;
@@ -28,11 +34,13 @@ void main()
     fVertWorldLocation.xyz = (mModel * vec4(vertPosition, 1.0f)).xyz;
 	fVertWorldLocation.w = 1.0f;
 
-    fNormal.xyz = normalize(mModelInverseTranspose * vec4(vNormal, 1.0f)).xyz;
+    fNormal.xyz = normalize(mModelInverseTranspose * vec4(vNormal.xyz, 1.0f)).xyz;
 	fNormal.w = 1.0f;
     //fNormal = vec4(vNormal.xyz, 1.0);
 
     fColor = vec4(vColor.rgb/0xff,1.0f);
-    fTextureUV = vTextureUV;
+    fUVx2 = vUVx2;
+    fTangent = vTangent;
+    fBinormal = vBiNormal;
 
 }

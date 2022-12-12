@@ -77,7 +77,15 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    window = glfwCreateWindow(1280, 800, "6028 Graphic Project1", NULL, NULL);
+    GLFWmonitor* pMainScreen = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(pMainScreen);
+
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    window = glfwCreateWindow(mode->width, mode->height, "6028 Final", pMainScreen, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -128,7 +136,7 @@ int main(void)
 
     pShaderManager->useShaderPRogram("Shader01");
     shaderID = pShaderManager->getIDfromName("Shader01");
-    //glUseProgram(shaderID);
+    glUseProgram(shaderID);
 
     //todo lighting
     ::g_pTheLightManager = new cLightManager();

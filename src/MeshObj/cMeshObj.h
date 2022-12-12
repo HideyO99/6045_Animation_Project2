@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <glm/glm.hpp>
+#include <vector>
 //#include <glm/vec3.hpp>
 
 class cMeshObj
@@ -19,6 +20,12 @@ public:
 	glm::vec4 specular_colour_and_power;
 	bool isVisible;
 	bool bDoNotLight;
+	std::string textures[8];
+	float textureRatios[8];
+
+	std::vector<cMeshObj*> vecChildMesh;
+	
+	cMeshObj* findMeshObjByName(std::string name, bool searchChild);
 
 };
 

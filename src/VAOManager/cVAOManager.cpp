@@ -22,34 +22,34 @@ bool cVAOManager::loadModelToVAO(std::string filename, cModelDrawInfo& drawInfo,
 	//vertices
 	glGenBuffers(1, &(drawInfo.VertexBufferID));
 	glBindBuffer(GL_ARRAY_BUFFER, drawInfo.VertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cModelDrawInfo::sVertex_XYZ_N_UV) * drawInfo.numberOfVertices, (GLvoid*)drawInfo.pVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones) * drawInfo.numberOfVertices, (GLvoid*)drawInfo.pVertices, GL_STATIC_DRAW);
 
 	//indices
 	glGenBuffers(1, &(drawInfo.IndexBufferID));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawInfo.IndexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * drawInfo.numberOfIndices, (GLvoid*)drawInfo.pIndices, GL_STATIC_DRAW);
 
-	//in vec3 vPosition;			
+	//in vec4 vPosition;			
 	GLint vPosition_location = glGetAttribLocation(shaderProgramID, "vPosition");
 	glEnableVertexAttribArray(vPosition_location);
 	glVertexAttribPointer(vPosition_location,
-		3, 
+		4, 
 		GL_FLOAT,
 		GL_FALSE,
-		sizeof(cModelDrawInfo::sVertex_XYZ_N_UV),						// Stride	(number of bytes)
-		(void*)offsetof(cModelDrawInfo::sVertex_XYZ_N_UV, x));		// Offset the member variable
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, x));		// Offset the member variable
 
-	//in vec3 vNormal;			
+	//in vec4 vNormal;			
 	GLint vNormal_location = glGetAttribLocation(shaderProgramID, "vNormal");
 	error = glGetError();
 	glEnableVertexAttribArray(vNormal_location);
 	error = glGetError();
 	glVertexAttribPointer(vNormal_location,
-		3, 
+		4, 
 		GL_FLOAT,
 		GL_FALSE,
-		sizeof(cModelDrawInfo::sVertex_XYZ_N_UV),						// Stride	(number of bytes)
-		(void*)offsetof(cModelDrawInfo::sVertex_XYZ_N_UV, nx));		// Offset the member variable
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, nx));		// Offset the member variable
 	error = glGetError();
 	//in vec4 vPosition;			
 	GLint vColor_location = glGetAttribLocation(shaderProgramID, "vColor");
@@ -59,21 +59,57 @@ bool cVAOManager::loadModelToVAO(std::string filename, cModelDrawInfo& drawInfo,
 		4,
 		GL_FLOAT,
 		GL_FALSE,
-		sizeof(cModelDrawInfo::sVertex_XYZ_N_UV),						// Stride	(number of bytes)
-		(void*)offsetof(cModelDrawInfo::sVertex_XYZ_N_UV, r));		// Offset the member variable
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, r));		// Offset the member variable
 	error = glGetError();
 
-	//in vec2 vTextureUV;			
-	GLint vTextureUV_location = glGetAttribLocation(shaderProgramID, "vTextureUV");
+	//in vec4 vUVx2;			
+	GLint vUVx2_location = glGetAttribLocation(shaderProgramID, "vUVx2");
 	error = glGetError();
-	glEnableVertexAttribArray(vTextureUV_location);
+	glEnableVertexAttribArray(vUVx2_location);
 	error = glGetError();
-	glVertexAttribPointer(vTextureUV_location,
-		2, GL_FLOAT,
+	glVertexAttribPointer(vUVx2_location,
+		4, GL_FLOAT,
 		GL_FALSE,
-		sizeof(cModelDrawInfo::sVertex_XYZ_N_UV),						// Stride	(number of bytes)
-		(void*)offsetof(cModelDrawInfo::sVertex_XYZ_N_UV, u));		// Offset the member variable
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, u0));		// Offset the member variable
 	error = glGetError();
+
+	//in vec4 vTangent;			
+	GLint vTangent_location = glGetAttribLocation(shaderProgramID, "vTangent");
+	glEnableVertexAttribArray(vTangent_location);
+	glVertexAttribPointer(vTangent_location,
+		4, GL_FLOAT,
+		GL_FALSE,
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, tx));		// Offset the member variable
+
+	//in vec4 vBiNormal;		
+	GLint vBiNormal_location = glGetAttribLocation(shaderProgramID, "vBiNormal");
+	glEnableVertexAttribArray(vBiNormal_location);
+	glVertexAttribPointer(vBiNormal_location,
+		4, GL_FLOAT,
+		GL_FALSE,
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, bx));		// Offset the member variable
+
+	//in vec4 vBoneID;			
+	GLint vBoneID_location = glGetAttribLocation(shaderProgramID, "vBoneID");
+	glEnableVertexAttribArray(vBoneID_location);
+	glVertexAttribPointer(vBoneID_location,
+		4, GL_FLOAT,
+		GL_FALSE,
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, vBoneID[0]));		// Offset the member variable
+
+	//in vec4 vBoneWeight;		
+	GLint vBoneWeight_location = glGetAttribLocation(shaderProgramID, "vBoneWeight");
+	glEnableVertexAttribArray(vBoneWeight_location);
+	glVertexAttribPointer(vBoneWeight_location,
+		4, GL_FLOAT,
+		GL_FALSE,
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, vBoneWeight[0]));		// Offset the member variable
 
 	glBindVertexArray(0);
 
@@ -83,7 +119,11 @@ bool cVAOManager::loadModelToVAO(std::string filename, cModelDrawInfo& drawInfo,
 	glDisableVertexAttribArray(vPosition_location);
 	glDisableVertexAttribArray(vNormal_location);
 	glDisableVertexAttribArray(vColor_location);
-	glDisableVertexAttribArray(vTextureUV_location);
+	glDisableVertexAttribArray(vUVx2_location);
+	glDisableVertexAttribArray(vTangent_location);
+	glDisableVertexAttribArray(vBiNormal_location);
+	glDisableVertexAttribArray(vBoneID_location);
+	glDisableVertexAttribArray(vBoneWeight_location);
 
 	this->mapModelNametoVAOID[drawInfo.meshName] = drawInfo;
 
@@ -186,7 +226,7 @@ bool cVAOManager::loadPLYFile(std::string filename, cModelDrawInfo& modelDrawInf
 		}
 	}
 
-	modelDrawInfo.pVertices = new cModelDrawInfo::sVertex_XYZ_N_UV[modelDrawInfo.numberOfVertices];
+	modelDrawInfo.pVertices = new cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones[modelDrawInfo.numberOfVertices];
 
 	for (unsigned int i = 0; i != modelDrawInfo.numberOfVertices; i++)
 	{
@@ -204,8 +244,8 @@ bool cVAOManager::loadPLYFile(std::string filename, cModelDrawInfo& modelDrawInf
 		modelFile >> modelDrawInfo.pVertices[i].b;
 		modelFile >> modelDrawInfo.pVertices[i].a;
 
-		modelFile >> modelDrawInfo.pVertices[i].u;
-		modelFile >> modelDrawInfo.pVertices[i].v;
+		modelFile >> modelDrawInfo.pVertices[i].u0;
+		modelFile >> modelDrawInfo.pVertices[i].v0;
 
 	}
 
@@ -340,3 +380,18 @@ cMeshObj* cVAOManager::findMeshObjAddr(std::string meshObjName)
 	}
 	return itCurrentMesh->second;
 }
+
+bool cVAOManager::setTexture(std::string meshObjName, std::string textureFile)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	pCurrentMeshObject->textures[0] = textureFile;
+	pCurrentMeshObject->textureRatios[0] = 1.0f;
+
+	return true;
+}
+

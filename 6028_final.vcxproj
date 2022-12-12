@@ -153,6 +153,9 @@
     <ClCompile Include="src\Shader\cShader.cpp" />
     <ClCompile Include="src\Shader\cShaderManager.cpp" />
     <ClCompile Include="src\Shader\cShaderProgram.cpp" />
+    <ClCompile Include="src\Texture\C24BitBMPpixel.cpp" />
+    <ClCompile Include="src\Texture\cTextureFromBMP.cpp" />
+    <ClCompile Include="src\Texture\cTextureManager.cpp" />
     <ClCompile Include="src\VAOManager\cModelDrawInfo.cpp" />
     <ClCompile Include="src\VAOManager\cVAOManager.cpp" />
     <ClCompile Include="src\XML\cXML.cpp" />
@@ -173,6 +176,9 @@
     <ClInclude Include="src\Light\cLightManager.h" />
     <ClInclude Include="src\MeshObj\cMeshObj.h" />
     <ClInclude Include="src\Shader\cShaderManager.h" />
+    <ClInclude Include="src\Texture\C24BitBMPpixel.h" />
+    <ClInclude Include="src\Texture\cTextureFromBMP.h" />
+    <ClInclude Include="src\Texture\cTextureManager.h" />
     <ClInclude Include="src\VAOManager\cModelDrawInfo.h" />
     <ClInclude Include="src\VAOManager\cVAOManager.h" />
     <ClInclude Include="src\XML\cXML.h" />

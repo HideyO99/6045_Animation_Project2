@@ -3,10 +3,19 @@
 in vec4 fColor;		// color;			
 in vec4 fNormal;
 in vec4 fVertWorldLocation;	// using only matModel
-in vec2 fTextureUV;
+in vec4 fUVx2;
+in vec4 fTangent;
+in vec4 fBinormal;
 
 #define MAX_LIGHT_SOURCE 10
 out vec4 pixelOutputColor;
+
+uniform bool bUseRGBA_Color;
+uniform bool bIsFlameObject;
+
+uniform bool bUseDiscardTexture;
+
+uniform vec4 debugColour;
 
 struct sLight
 {
@@ -37,21 +46,69 @@ uniform vec4 specularColour;			// RGB object hightlight COLOUR
 										//	1 = not shiny 
 										// 10 = "meh" shiny
 
+uniform sampler2D texture0;		// "Brick texture"
+uniform sampler2D texture1;		// "Lady Gaga"
+uniform sampler2D texture2;		// "Lady Gaga"
+uniform sampler2D texture3;		// "Lady Gaga"
+uniform sampler2D texture4;		// "Brick texture"
+uniform sampler2D texture5;		// "Lady Gaga"
+uniform sampler2D texture6;		// "Lady Gaga"
+uniform sampler2D texture7;		// "Lady Gaga"
+
+uniform vec4 texRatio_0_3;		// x = texture0, y = texture1, etc. 0 to 1
+uniform vec4 texRatio_4_7;		// 0 to 1
+
+uniform samplerCube skyboxTexture;
+// When true, applies the skybox texture
+uniform bool bIsSkyboxObject;
+
+// HACK: colour the island
+uniform bool bIsIlandModel;
+
 void main()
 {
+	if (bIsSkyboxObject)
+	{
+		vec3 cubeMapColour = texture( skyboxTexture, fNormal.xyz ).rgb;
+		pixelOutputColor.rgb = cubeMapColour.rgb;
+		pixelOutputColor.a = 1.0f;
+		return;
+	}
+
 	vec4 finalObjectColour = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	
     vec3 materialColor = fColor.rgb;
-    materialColor = RGBA_Color.rgb;
     
-    //vec3 ambient = 0.6 * materialColor;
+
+	float alphaTransparency = RGBA_Color.w;
+
+	if(bUseRGBA_Color)
+	{
+		materialColor = RGBA_Color.rgb;
+	}
+	else
+	{	
+		vec3 textColour0 = texture( texture0, fUVx2.st ).rgb;		
+		vec3 textColour1 = texture( texture1, fUVx2.st ).rgb;	
+		vec3 textColour2 = texture( texture2, fUVx2.st ).rgb;	
+		vec3 textColour3 = texture( texture3, fUVx2.st ).rgb;	
+		
+		
+		materialColor =   (textColour0.rgb * texRatio_0_3.x) 
+						 + (textColour1.rgb * texRatio_0_3.y) 
+						 + (textColour2.rgb * texRatio_0_3.z) 
+						 + (textColour3.rgb * texRatio_0_3.w);
+	}
+    
+
     if ( bDoNotLight )
 	{
 		// Set the output colour and exit early
 		// (Don't apply the lighting to this)
-		pixelOutputColor = vec4(materialColor.rgb, 1);
+		pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
 		return;
 	}
+
     vec3 normal = normalize(fNormal.xyz);
 	for(int i = 0; i < MAX_LIGHT_SOURCE; i++)
 	{
@@ -121,7 +178,7 @@ void main()
 		
 		finalObjectColour.rgb += (materialColor.rgb * lightDiffuseContrib.rgb) + (specularColour.rgb  * lightSpecularContrib.rgb );
 	}
-	pixelOutputColor = vec4(finalObjectColour.rgb, 1.0);
+	pixelOutputColor = vec4(finalObjectColour.rgb, alphaTransparency);
 	vec3 ambient = 0.35 * materialColor;
 	pixelOutputColor.rgb += ambient;
 }
