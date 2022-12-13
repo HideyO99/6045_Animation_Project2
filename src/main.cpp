@@ -22,10 +22,12 @@
 #include "MeshObj/cMeshObj.h"
 #include "Light/cLightManager.h"
 #include "GUI/cGUI.h"
+#include "Texture/cTextureManager.h"
 
 #define MODEL_LIST_XML          "asset/model.xml"
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
+#define TEXTURE_PATH            "asset/texture"
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
 glm::vec3 g_cameraTarget = glm::vec3(6.0f, 0.0f, 0.0f);
@@ -42,6 +44,8 @@ float fov = 45.0f;
 cLightManager* g_pTheLightManager = NULL;
 static GLFWwindow* window = nullptr;
 
+cTextureManager* g_pTextureManager = NULL;
+
 
 static void error_callback(int error, const char* description)
 {
@@ -53,6 +57,7 @@ static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
+void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
 void light0Setup();
 void light1Setup();
 void light2Setup();
@@ -169,11 +174,16 @@ int main(void)
     //gui_->pMapInstanceNametoMeshObj = &pVAOManager->mapInstanceNametoMeshObj;
     gui_->pVecInstanceMeshObj = &pVAOManager->pVecInstanceMeshObj;
 
+    //load texture
+    ::g_pTextureManager = new cTextureManager();
+    ::g_pTextureManager->setBasePath(TEXTURE_PATH);
+    ::g_pTextureManager->create2DTextureFromBMP("cobblestones_stencil_mask.bmp");
     //setup object
     //result = pVAOManager->setInstanceObjVisible("terrain01", true);
     result = pVAOManager->setInstanceObjRGB("terrain01", glm::vec4(1.f,1.f,1.f,1.f));
     result = pVAOManager->setInstanceObjSpecularPower("terrain01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
     result = pVAOManager->setInstanceObjScale("terrain01", 20);
+    result = pVAOManager->setTexture("terrain01", "cobblestones_stencil_mask.bmp", 0);
 
    // result = pVAOManager->setInstanceObjVisible("sphere01", true);
     result = pVAOManager->setInstanceObjRGB("traffic", glm::vec4(1.f, 1.f, 1.f, 1.f));
@@ -257,6 +267,16 @@ int main(void)
     ////result = pVAOManager->setInstanceObjVisible("terrain02", true);
     ////result = pVAOManager->setInstanceObjScale("terrain02", 0.5);
 
+    //GLint mvp_location = glGetUniformLocation(shaderID, "MVP");       // program
+    //// uniform mat4 mModel;
+    //// uniform mat4 mView;
+    //// uniform mat4 mProjection;
+    //GLint mModel_location = glGetUniformLocation(shaderID, "mModel");
+    //GLint mView_location = glGetUniformLocation(shaderID, "mView");
+    //GLint mProjection_location = glGetUniformLocation(shaderID, "mProjection");
+    //// Need this for lighting
+    //GLint mModelInverseTransform_location = glGetUniformLocation(shaderID, "mModelInverseTranspose");
+
     while (!glfwWindowShouldClose(window))
     {
         ::g_pTheLightManager->setLightToShader(shaderID);
@@ -292,6 +312,9 @@ int main(void)
         glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
 
         matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 10000.0f);
+
+        //glUniformMatrix4fv(mView_location, 1, GL_FALSE, glm::value_ptr(matView));
+        //glUniformMatrix4fv(mProjection_location, 1, GL_FALSE, glm::value_ptr(matProjection));
 
         updateInstanceObj(pShaderManager, pVAOManager, matView, matProjection);
 
@@ -332,94 +355,176 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
             continue;
         }
 
-        // Don't draw any "back facing" triangles
-        glCullFace(GL_BACK);
+        matModel = glm::mat4x4(1.0f);
 
-        // Turn on depth buffer test at draw time
-        glEnable(GL_DEPTH_TEST);
+        drawObj(pCurrentMeshObject, matModel, pShaderManager, pVAOManager, matView, matProjection);
+    
+    }
+}
 
-        matModel = glm::mat4x4(1.0f);  // identity matrix
+void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection)
+{
+    // Don't draw any "back facing" triangles
+    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    // Turn on depth buffer test at draw time
+    glEnable(GL_DEPTH_TEST);
 
-        // Move the object 
-        glm::mat4 matTranslation = glm::translate(glm::mat4(1.0f), pCurrentMeshObject->position);
-        
-        //std::cout << pCurrentMeshObject->instanceName << " position x = " << pCurrentMeshObject->position.x << " y = " << pCurrentMeshObject->position.y << " z = " << pCurrentMeshObject->position.z << std::endl;
-        
-        //rotate
-        glm::mat4 matRoationZ = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-        glm::mat4 matRoationY = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::mat4 matRoationX = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    //matModel = glm::mat4x4(1.0f);  // identity matrix
 
-        // Scale the object
-        float uniformScale = pCurrentMeshObject->scale;
-        glm::mat4 matScale = glm::scale(glm::mat4(1.0f), glm::vec3(uniformScale, uniformScale, uniformScale));
+#if 0   //flame effect
+    pShaderManager->setShaderUniform1f("bIsFlameObject", (GLfloat)GL_TRUE);
+    glDepthMask(GL_FALSE);
+#endif
+#if 0   //discard texture
+    pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_TRUE);
+#endif
 
-        matModel = matModel * matTranslation;
+    //GLuint texture07_Number = g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[7]);
+    //GLuint texture07_Unit = 7;
+    //glActiveTexture(texture07_Unit + GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, texture07_Number);
+    //pShaderManager->setShaderUniform1i("texture7", texture07_Unit);
 
-        matModel = matModel * matRoationX;
-        matModel = matModel * matRoationY;
-        matModel = matModel * matRoationZ;
+    glm::mat4x4 matModel = mat_PARENT_Model;
+    // Move the object 
+    glm::mat4 matTranslation = glm::translate(glm::mat4(1.0f), pCurrentMeshObject->position);
 
-        matModel = matModel * matScale;
+    //std::cout << pCurrentMeshObject->instanceName << " position x = " << pCurrentMeshObject->position.x << " y = " << pCurrentMeshObject->position.y << " z = " << pCurrentMeshObject->position.z << std::endl;
 
-        pShaderManager->setShaderUniformM4fv("mModel", matModel);
-        pShaderManager->setShaderUniformM4fv("mView", matView);
-        pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
+    //rotate
+    glm::mat4 matRoationZ = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 matRoationY = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 matRoationX = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 
-        glm::mat4 mModelInverseTransform = glm::inverse(glm::transpose(matModel));
-        pShaderManager->setShaderUniformM4fv("mModelInverseTranspose", mModelInverseTransform);
+    // Scale the object
+    float uniformScale = pCurrentMeshObject->scale;
+    glm::mat4 matScale = glm::scale(glm::mat4(1.0f), glm::vec3(uniformScale, uniformScale, uniformScale));
 
-        // Wireframe
-        if (pCurrentMeshObject->isWireframe)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);      // GL_POINT, GL_LINE, GL_FILL
-        }
-        else
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
+    matModel = matModel * matTranslation;
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    matModel = matModel * matRoationX;
+    matModel = matModel * matRoationY;
+    matModel = matModel * matRoationZ;
 
-        pShaderManager->setShaderUniform4f("RGBA_Color",
-            pCurrentMeshObject->color_RGBA.r,
-            pCurrentMeshObject->color_RGBA.g,
-            pCurrentMeshObject->color_RGBA.b,
-            pCurrentMeshObject->color_RGBA.w);
+    matModel = matModel * matScale;
 
-        pShaderManager->setShaderUniform4f("specularColour",
-            pCurrentMeshObject->specular_colour_and_power.r,
-            pCurrentMeshObject->specular_colour_and_power.g,
-            pCurrentMeshObject->specular_colour_and_power.b,
-            pCurrentMeshObject->specular_colour_and_power.w);
+    pShaderManager->setShaderUniformM4fv("mModel", matModel);
+    pShaderManager->setShaderUniformM4fv("mView", matView);
+    pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
 
-        //uniform bool bDoNotLight;	
-        if (pCurrentMeshObject->bDoNotLight)
-        {
-            pShaderManager->setShaderUniform1f("bDoNotLight", (GLfloat)GL_TRUE);
-        }
-        else
-        {
-            pShaderManager->setShaderUniform1f("bDoNotLight", (GLfloat)GL_FALSE);
-        }
+    glm::mat4 mModelInverseTransform = glm::inverse(glm::transpose(matModel));
+    pShaderManager->setShaderUniformM4fv("mModelInverseTranspose", mModelInverseTransform);
 
-        cModelDrawInfo drawingInformation;
-        if (pVAOManager->FindDrawInfo(pCurrentMeshObject->meshName, drawingInformation))
-        {
-            glBindVertexArray(drawingInformation.VAO_ID);
+    // Wireframe
+    if (pCurrentMeshObject->isWireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);      // GL_POINT, GL_LINE, GL_FILL
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
-            glDrawElements(GL_TRIANGLES, drawingInformation.numberOfIndices, GL_UNSIGNED_INT, (void*)0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            glBindVertexArray(0);
+    pShaderManager->setShaderUniform4f("RGBA_Color",
+        pCurrentMeshObject->color_RGBA.r,
+        pCurrentMeshObject->color_RGBA.g,
+        pCurrentMeshObject->color_RGBA.b,
+        pCurrentMeshObject->color_RGBA.w);
 
-        }
-        else
-        {
-            // Didn't find that model
-            std::cout << "Error: didn't find model to draw." << std::endl;
+    pShaderManager->setShaderUniform1f("bUseRGBA_Color", (GLfloat)GL_TRUE);
 
-        }
+    pShaderManager->setShaderUniform4f("specularColour",
+        pCurrentMeshObject->specular_colour_and_power.r,
+        pCurrentMeshObject->specular_colour_and_power.g,
+        pCurrentMeshObject->specular_colour_and_power.b,
+        pCurrentMeshObject->specular_colour_and_power.w);
+
+    //uniform bool bDoNotLight;	
+    if (pCurrentMeshObject->bDoNotLight)
+    {
+        pShaderManager->setShaderUniform1f("bDoNotLight", (GLfloat)GL_TRUE);
+    }
+    else
+    {
+        pShaderManager->setShaderUniform1f("bDoNotLight", (GLfloat)GL_FALSE);
+    }
+
+    //set texture0
+    GLuint texture00_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[0]);
+    GLuint texture00_Unit = 0;
+    glActiveTexture(texture00_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture00_Number);
+    pShaderManager->setShaderUniform1i("texture0", texture00_Unit);
+    //set texture1
+    GLuint texture01_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[1]);
+    GLuint texture01_Unit = 1;
+    glActiveTexture(texture01_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture01_Number);
+    pShaderManager->setShaderUniform1i("texture1", texture01_Unit);
+    //set texture2
+    GLuint texture02_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[2]);
+    GLuint texture02_Unit = 2;
+    glActiveTexture(texture02_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture02_Number);
+    pShaderManager->setShaderUniform1i("texture2", texture02_Unit);
+    //set texture3
+    GLuint texture03_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[3]);
+    GLuint texture03_Unit = 3;
+    glActiveTexture(texture03_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture03_Number);
+    pShaderManager->setShaderUniform1i("texture3", texture03_Unit);
+    //set texture4
+    GLuint texture04_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[4]);
+    GLuint texture04_Unit = 4;
+    glActiveTexture(texture04_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture04_Number);
+    pShaderManager->setShaderUniform1i("texture4", texture04_Unit);
+    //set texture5
+    GLuint texture05_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[5]);
+    GLuint texture05_Unit = 5;
+    glActiveTexture(texture05_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture05_Number);
+    pShaderManager->setShaderUniform1i("texture5", texture05_Unit);
+    //set texture6
+    GLuint texture06_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[6]);
+    GLuint texture06_Unit = 6;
+    glActiveTexture(texture06_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture06_Number);
+    pShaderManager->setShaderUniform1i("texture6", texture06_Unit);
+
+    pShaderManager->setShaderUniform4f("trxRatio_0_3",
+        pCurrentMeshObject->textureRatios[0],
+        pCurrentMeshObject->textureRatios[1],
+        pCurrentMeshObject->textureRatios[2],
+        pCurrentMeshObject->textureRatios[3]);
+
+    cModelDrawInfo drawingInformation;
+    if (pVAOManager->FindDrawInfo(pCurrentMeshObject->meshName, drawingInformation))
+    {
+        glBindVertexArray(drawingInformation.VAO_ID);
+
+        glDrawElements(GL_TRIANGLES, drawingInformation.numberOfIndices, GL_UNSIGNED_INT, (void*)0);
+
+        glBindVertexArray(0);
+
+    }
+    else
+    {
+        // Didn't find that model
+        std::cout << "Error: didn't find model to draw." << std::endl;
+
+    }
+
+    for (std::vector<cMeshObj* >::iterator itCurrentMesh = pCurrentMeshObject->vecChildMesh.begin();
+        itCurrentMesh != pCurrentMeshObject->vecChildMesh.end();
+        itCurrentMesh++)
+    {
+        cMeshObj* pCurrentChildMeshObject = *itCurrentMesh;
+        drawObj(pCurrentChildMeshObject, matModel, pShaderManager, pVAOManager, matView, matProjection);
     }
 }
 

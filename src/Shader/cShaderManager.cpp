@@ -128,6 +128,11 @@ void cShaderManager::setShaderUniform4f(std::string name, const float value1, co
 	glUniform4f(lo, value1, value2, value3, value4);
 }
 
+void cShaderManager::setShaderUniform1i(std::string name, int value)
+{
+	GLint lo = glGetUniformLocation(shaderID, name.c_str());
+	glUniform1i(lo, value);
+}
 
 
 bool cShaderManager::cLoadShaderSourceCode(cShader& shader)

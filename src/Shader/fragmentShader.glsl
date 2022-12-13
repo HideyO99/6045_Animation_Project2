@@ -69,18 +69,75 @@ void main()
 {
 	if (bIsSkyboxObject)
 	{
-		vec3 cubeMapColour = texture( skyboxTexture, fNormal.xyz ).rgb;
-		pixelOutputColor.rgb = cubeMapColour.rgb;
+		vec3 cubeMapColor = texture( skyboxTexture, fNormal.xyz ).rgb;
+		pixelOutputColor.rgb = cubeMapColor.rgb;
 		pixelOutputColor.a = 1.0f;
 		return;
 	}
 
-	vec4 finalObjectColour = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	if ( bIsIlandModel )
+	{
+	
+		if ( fVertWorldLocation.y < -25.0f )
+		{	// Water
+			pixelOutputColor.rgb = vec3(0.0f, 0.0f, 1.0f);
+		}
+		else if ( fVertWorldLocation.y < -15.0f )
+		{	// Sand ( 89.8% red, 66.67% green and 43.92% )
+			pixelOutputColor.rgb = vec3(0.898f, 0.6667f, 0.4392f);
+		}
+		else if ( fVertWorldLocation.y < 30.0f )
+		{	// Grass
+			pixelOutputColor.rgb = vec3(0.0f, 1.0f, 0.0f);
+		}
+		else
+		{	// Snow
+			pixelOutputColor.rgb = vec3(1.0f, 1.0f, 1.0f);
+		}
+		pixelOutputColor.a = 1.0f;
+	
+	
+		return;
+	}
+
+	vec4 finalObjectColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	
     vec3 materialColor = fColor.rgb;
     
 
 	float alphaTransparency = RGBA_Color.w;
+
+		// For the exhaust of the drop ship
+	if (bIsFlameObject)
+	{
+		// DON'T light. Apply the texture. Use colour as alpha
+		vec3 flameColor = texture( texture0, fUVx2.st ).rgb;	
+		
+		pixelOutputColor.rgb = flameColor;
+		
+		// Set the alpha transparency based on the colour.
+		float RGBcolorSum = pixelOutputColor.r + pixelOutputColor.g + pixelOutputColor.b;
+		pixelOutputColor.a = max( ((RGBcolorSum - 0.1f) / 3.0f), 0.0f);
+	
+	
+		// Exit early so bypasses lighting
+		return;
+	}
+
+	if ( bUseDiscardTexture )
+	{	
+		// Compare the colour in the texture07 black and white texture
+		// If it's 'black enough' then don't draw the pixel
+		// NOTE: I'm only sampling from the red 
+		// (since it's black and white, all channels would be the same)
+		float greyscalevalue = texture( texture7, fUVx2.st ).r;
+		
+		// Here, 0.5 is "black enough" 
+		if ( greyscalevalue < 0.5f )
+		{
+			discard;
+		}
+	}
 
 	if(bUseRGBA_Color)
 	{
@@ -99,7 +156,7 @@ void main()
 						 + (textColour2.rgb * texRatio_0_3.z) 
 						 + (textColour3.rgb * texRatio_0_3.w);
 	}
-    
+
 
     if ( bDoNotLight )
 	{
@@ -108,7 +165,7 @@ void main()
 		pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
 		return;
 	}
-
+	// calculateLightContribute
     vec3 normal = normalize(fNormal.xyz);
 	for(int i = 0; i < MAX_LIGHT_SOURCE; i++)
 	{
@@ -123,7 +180,7 @@ void main()
 			float dotProd = dot(-Light[i].direction.xyz, normal);//normalize(normal.xyz));
 			dotProd = max( 0.0f, dotProd);
 			lightContrib *= dotProd;
-			finalObjectColour.rgb += (materialColor.rgb * Light[i].diffuse.rgb * lightContrib);
+			finalObjectColor.rgb += (materialColor.rgb * Light[i].diffuse.rgb * lightContrib);
 			continue;
 		}
 		
@@ -176,9 +233,11 @@ void main()
 			}		
 		}
 		
-		finalObjectColour.rgb += (materialColor.rgb * lightDiffuseContrib.rgb) + (specularColour.rgb  * lightSpecularContrib.rgb );
+		finalObjectColor.rgb += (materialColor.rgb * lightDiffuseContrib.rgb) + (specularColour.rgb  * lightSpecularContrib.rgb );
 	}
-	pixelOutputColor = vec4(finalObjectColour.rgb, alphaTransparency);
-	vec3 ambient = 0.35 * materialColor;
+
+	pixelOutputColor = vec4(finalObjectColor.rgb, alphaTransparency);
+	//materialColor = vec3(0.5f,0.5f,0.5f);
+	vec3 ambient = 0.15 * materialColor;
 	pixelOutputColor.rgb += ambient;
 }

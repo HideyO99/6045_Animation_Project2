@@ -10,6 +10,7 @@ cMeshObj::cMeshObj()
 	this->isWireframe = false;
 
 	this->color_RGBA = glm::vec4(0.f, 0.f, 0.f, 1.f);
+	this->bUse_RGBA_colour = true;
 	this->specular_colour_and_power = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	this->isVisible = true;
 	this->bDoNotLight = false;

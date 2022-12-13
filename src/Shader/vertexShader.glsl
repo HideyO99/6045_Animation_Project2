@@ -1,8 +1,8 @@
 #version 420
 
-layout (location = 0) in vec4 vPosition ;
-layout (location = 1) in vec4 vNormal ;		
-layout (location = 2) in vec4 vColor ;
+layout (location = 0) in vec4 vColour ;
+layout (location = 1) in vec4 vPosition ;
+layout (location = 2) in vec4 vNormal ;		
 layout (location = 3) in vec4 vUVx2;
 layout (location = 4) in vec4 vTangent;
 layout (location = 5) in vec4 vBiNormal;
@@ -37,8 +37,8 @@ void main()
     fNormal.xyz = normalize(mModelInverseTranspose * vec4(vNormal.xyz, 1.0f)).xyz;
 	fNormal.w = 1.0f;
     //fNormal = vec4(vNormal.xyz, 1.0);
-
-    fColor = vec4(vColor.rgb/0xff,1.0f);
+    //fColor = vec4(vColour.rgb/0xff,1.0f);
+    fColor = vColour;
     fUVx2 = vUVx2;
     fTangent = vTangent;
     fBinormal = vBiNormal;

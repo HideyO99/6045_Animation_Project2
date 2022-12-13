@@ -29,6 +29,19 @@ bool cVAOManager::loadModelToVAO(std::string filename, cModelDrawInfo& drawInfo,
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawInfo.IndexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * drawInfo.numberOfIndices, (GLvoid*)drawInfo.pIndices, GL_STATIC_DRAW);
 
+
+	//in vec4 vColor;
+	GLint vColor_location = glGetAttribLocation(shaderProgramID, "vColour");
+	glEnableVertexAttribArray(vColor_location);
+	error = glGetError();
+	glVertexAttribPointer(vColor_location,
+		4,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
+		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, r));		// Offset the member variable
+	error = glGetError();
+
 	//in vec4 vPosition;			
 	GLint vPosition_location = glGetAttribLocation(shaderProgramID, "vPosition");
 	glEnableVertexAttribArray(vPosition_location);
@@ -50,18 +63,7 @@ bool cVAOManager::loadModelToVAO(std::string filename, cModelDrawInfo& drawInfo,
 		GL_FALSE,
 		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
 		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, nx));		// Offset the member variable
-	error = glGetError();
-	//in vec4 vPosition;			
-	GLint vColor_location = glGetAttribLocation(shaderProgramID, "vColor");
-	glEnableVertexAttribArray(vColor_location);
-	error = glGetError();
-	glVertexAttribPointer(vColor_location,
-		4,
-		GL_FLOAT,
-		GL_FALSE,
-		sizeof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones),						// Stride	(number of bytes)
-		(void*)offsetof(cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones, r));		// Offset the member variable
-	error = glGetError();
+	error = glGetError();			
 
 	//in vec4 vUVx2;			
 	GLint vUVx2_location = glGetAttribLocation(shaderProgramID, "vUVx2");
@@ -381,7 +383,7 @@ cMeshObj* cVAOManager::findMeshObjAddr(std::string meshObjName)
 	return itCurrentMesh->second;
 }
 
-bool cVAOManager::setTexture(std::string meshObjName, std::string textureFile)
+bool cVAOManager::setTexture(std::string meshObjName, std::string textureFile, int arrPos)
 {
 	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
 	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
@@ -389,8 +391,25 @@ bool cVAOManager::setTexture(std::string meshObjName, std::string textureFile)
 		return false;
 	}
 	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
-	pCurrentMeshObject->textures[0] = textureFile;
-	pCurrentMeshObject->textureRatios[0] = 1.0f;
+	pCurrentMeshObject->textures[arrPos] = textureFile;
+	pCurrentMeshObject->textureRatios[arrPos] = 1.0f;
+
+	return true;
+}
+
+bool cVAOManager::bindingChild(std::string meshChildObjName, std::string meshParentObjName)
+{
+	std::map<std::string, cMeshObj* >::iterator itParentMesh = mapInstanceNametoMeshObj.find(meshParentObjName);
+	std::map<std::string, cMeshObj* >::iterator itChildMesh = mapInstanceNametoMeshObj.find(meshChildObjName);
+	if (itParentMesh == mapInstanceNametoMeshObj.end() || itChildMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+
+	cMeshObj* pParentMeshObject = itParentMesh->second;
+	cMeshObj* pChildMeshObject = itChildMesh->second;
+	pParentMeshObject->vecChildMesh.push_back(pChildMeshObject);
+	mapInstanceNametoMeshObj.erase(meshChildObjName);
 
 	return true;
 }

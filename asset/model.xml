@@ -1,6 +1,6 @@
 <?xml version = "1.0" encoding="UTF-8"?>
 <PLYMODEL>
-	<model name="terrain">asset/model/terrain.ply
+	<model name="terrain">asset/model/terrain1.ply
 		<modelInstance>terrain01
 			<posX>0</posX>
 			<posY>0</posY>

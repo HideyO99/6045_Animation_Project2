@@ -17,6 +17,7 @@ public:
 	float scale;
 	bool isWireframe;
 	glm::vec4 color_RGBA;
+	bool bUse_RGBA_colour;
 	glm::vec4 specular_colour_and_power;
 	bool isVisible;
 	bool bDoNotLight;
@@ -25,7 +26,7 @@ public:
 
 	std::vector<cMeshObj*> vecChildMesh;
 	
-	cMeshObj* findMeshObjByName(std::string name, bool searchChild);
+	cMeshObj* findMeshObjByName(std::string name, bool searchChild = true);
 
 };
 
