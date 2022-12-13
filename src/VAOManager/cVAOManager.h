@@ -37,7 +37,13 @@ public:
 
 	bool setTexture(std::string meshObjName, std::string textureFile, int arrPos);
 
+	bool setTextureRatio(std::string meshObjName, int arrPos, float ratio);
+
 	bool bindingChild(std::string meshChildObjName, std::string meshParentObjName);
+
+	bool setSkyBoxFlag(std::string meshObjName, bool flag);
+
+	bool setIslandModelFlag(std::string meshObjName, bool flag);
 
 	std::map<std::string, cMeshObj*> mapInstanceNametoMeshObj;
 	std::vector<cMeshObj*> pVecInstanceMeshObj;

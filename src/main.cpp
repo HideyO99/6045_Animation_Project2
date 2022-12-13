@@ -178,6 +178,23 @@ int main(void)
     ::g_pTextureManager = new cTextureManager();
     ::g_pTextureManager->setBasePath(TEXTURE_PATH);
     ::g_pTextureManager->create2DTextureFromBMP("cobblestones_stencil_mask.bmp");
+
+    std::string load_texture_error = "";
+    if (g_pTextureManager->createCubeTextureFromBMP("TropicalSunnyDay",
+        "TropicalSunnyDayRight2048.bmp", /* positive X */
+        "TropicalSunnyDayLeft2048.bmp",  /* negative X */
+        "TropicalSunnyDayUp2048.bmp",    /* positive Y */
+        "TropicalSunnyDayDown2048.bmp",  /* negative Y */
+        "TropicalSunnyDayBack2048.bmp",  /* positive Z */
+        "TropicalSunnyDayFront2048.bmp", /* negative Z */
+        true, load_texture_error))
+    {
+        std::cout << "Loaded the tropical sunny day cube map OK" << std::endl;
+    }
+    else
+    {
+        std::cout << "ERROR: Didn't load the tropical sunny day cube map.->" << load_texture_error << std::endl;
+    }
     //setup object
     //result = pVAOManager->setInstanceObjVisible("terrain01", true);
     result = pVAOManager->setInstanceObjRGB("terrain01", glm::vec4(1.f,1.f,1.f,1.f));
@@ -190,9 +207,10 @@ int main(void)
     result = pVAOManager->setInstanceObjSpecularPower("traffic", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
     result = pVAOManager->setInstanceObjScale("traffic", 2);
 
-    result = pVAOManager->setInstanceObjRGB("building01", glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("building01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("building01", 0.4);
+    //result = pVAOManager->setInstanceObjRGB("skybox", glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
+    //result = pVAOManager->setInstanceObjSpecularPower("skybox", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
+    //result = pVAOManager->setInstanceObjScale("skybox", 0.4);
+    result = pVAOManager->setSkyBoxFlag("skybox",true);
 
     result = pVAOManager->setInstanceObjRGB("building02", glm::vec4(1.f, 0.8f, 0.5f, 1.f));
     result = pVAOManager->setInstanceObjSpecularPower("building02", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
@@ -312,7 +330,7 @@ int main(void)
         glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
 
         matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 10000.0f);
-
+        //matProjection = glm::perspective(0.6f, ratio, 0.1f, 10000.0f);
         //glUniformMatrix4fv(mView_location, 1, GL_FALSE, glm::value_ptr(matView));
         //glUniformMatrix4fv(mProjection_location, 1, GL_FALSE, glm::value_ptr(matProjection));
 
@@ -354,11 +372,27 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
             // Skip the rest of the loop
             continue;
         }
-
+        if (pCurrentMeshObject->isIslandModel)
+        {
+            pShaderManager->setShaderUniform1f("bIsIlandModel", (GLfloat)GL_TRUE);
+        }
+        if (pCurrentMeshObject->isSkybox)
+        {
+            pShaderManager->setShaderUniform1f("bIsSkyboxObject", (GLfloat)GL_TRUE);
+            pCurrentMeshObject->position = ::g_cameraEye;
+            pCurrentMeshObject->scale = 7500.f;
+        }
         matModel = glm::mat4x4(1.0f);
 
         drawObj(pCurrentMeshObject, matModel, pShaderManager, pVAOManager, matView, matProjection);
-    
+        if (pCurrentMeshObject->isSkybox)
+        {
+            pShaderManager->setShaderUniform1f("bIsSkyboxObject", (GLfloat)GL_FALSE);
+        }
+        if (pCurrentMeshObject->isIslandModel)
+        {
+            pShaderManager->setShaderUniform1f("bIsIlandModel", (GLfloat)GL_FALSE);
+        }
     }
 }
 
@@ -435,8 +469,14 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
         pCurrentMeshObject->color_RGBA.b,
         pCurrentMeshObject->color_RGBA.w);
 
-    pShaderManager->setShaderUniform1f("bUseRGBA_Color", (GLfloat)GL_TRUE);
-
+    if (pCurrentMeshObject->bUse_RGBA_colour)
+    {
+        pShaderManager->setShaderUniform1f("bUseRGBA_Color", (GLfloat)GL_TRUE);
+    }
+    else
+    {
+        pShaderManager->setShaderUniform1f("bUseRGBA_Color", (GLfloat)GL_FALSE);
+    }
     pShaderManager->setShaderUniform4f("specularColour",
         pCurrentMeshObject->specular_colour_and_power.r,
         pCurrentMeshObject->specular_colour_and_power.g,
@@ -501,6 +541,13 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
         pCurrentMeshObject->textureRatios[1],
         pCurrentMeshObject->textureRatios[2],
         pCurrentMeshObject->textureRatios[3]);
+
+    //cube map texture
+    GLuint cubeMapTextureNumber = g_pTextureManager->getTexttureID("TropicalSunnyDay");
+    GLuint texture30Unit = 30;
+    glActiveTexture(texture30Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTextureNumber);
+    pShaderManager->setShaderUniform1i("skyboxTexture", texture30Unit);
 
     cModelDrawInfo drawingInformation;
     if (pVAOManager->FindDrawInfo(pCurrentMeshObject->meshName, drawingInformation))

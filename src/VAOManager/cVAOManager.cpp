@@ -397,6 +397,19 @@ bool cVAOManager::setTexture(std::string meshObjName, std::string textureFile, i
 	return true;
 }
 
+bool cVAOManager::setTextureRatio(std::string meshObjName, int arrPos, float ratio)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	pCurrentMeshObject->textureRatios[arrPos] = ratio;
+
+	return true;
+}
+
 bool cVAOManager::bindingChild(std::string meshChildObjName, std::string meshParentObjName)
 {
 	std::map<std::string, cMeshObj* >::iterator itParentMesh = mapInstanceNametoMeshObj.find(meshParentObjName);
@@ -410,6 +423,32 @@ bool cVAOManager::bindingChild(std::string meshChildObjName, std::string meshPar
 	cMeshObj* pChildMeshObject = itChildMesh->second;
 	pParentMeshObject->vecChildMesh.push_back(pChildMeshObject);
 	mapInstanceNametoMeshObj.erase(meshChildObjName);
+
+	return true;
+}
+
+bool cVAOManager::setSkyBoxFlag(std::string meshObjName, bool flag)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	pCurrentMeshObject->isSkybox = flag; 
+
+	return true;
+}
+
+bool cVAOManager::setIslandModelFlag(std::string meshObjName, bool flag)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	pCurrentMeshObject->isIslandModel = flag;
 
 	return true;
 }

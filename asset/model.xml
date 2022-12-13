@@ -20,13 +20,13 @@
 			<rotateZ>0</rotateZ>
 		</modelInstance>
 	</model>
-	<model name="building1">asset/model/Buildings_69_SF.ply
-		<modelInstance>building01
-			<posX>20</posX>
-			<posY>6.7</posY>
-			<posZ>4.8</posZ>
+	<model name="skybox">asset/model/UV_Sphere_for_Skybox_inverted_Normals_xyz_uv_n_rgba.ply
+		<modelInstance>skybox
+			<posX>0</posX>
+			<posY>0</posY>
+			<posZ>0</posZ>
 			<rotateX>0</rotateX>
-			<rotateY>2.33</rotateY>
+			<rotateY>0</rotateY>
 			<rotateZ>0</rotateZ>
 		</modelInstance>
 		

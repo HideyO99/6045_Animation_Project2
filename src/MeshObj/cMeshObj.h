@@ -23,6 +23,8 @@ public:
 	bool bDoNotLight;
 	std::string textures[8];
 	float textureRatios[8];
+	bool isSkybox;
+	bool isIslandModel;
 
 	std::vector<cMeshObj*> vecChildMesh;
 	

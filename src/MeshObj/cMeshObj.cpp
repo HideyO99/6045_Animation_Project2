@@ -14,6 +14,8 @@ cMeshObj::cMeshObj()
 	this->specular_colour_and_power = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	this->isVisible = true;
 	this->bDoNotLight = false;
+	this->isSkybox = false;
+	this->isIslandModel = false;
 
 	this->textureRatios[0] = 0.0f;
 	this->textureRatios[1] = 0.0f;
