@@ -487,9 +487,13 @@
 	<model name="terrain">asset/model/terrain.ply
 		<modelInstance>terrain<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
+	
+	<model name="moon">asset/model/UV_Sphere_Cylindrical_UIV_Projection_.ply
+		<modelInstance>moon<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+	</model>
 </PLYMODEL>
 <EYE_LOCATION>
-	<x>-11</x>
-	<y>30</y>
-	<z>28.0</z>
+	<x>-60</x>
+	<y>14</y>
+	<z>151</z>
 </EYE_LOCATION>
