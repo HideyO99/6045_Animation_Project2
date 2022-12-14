@@ -472,16 +472,20 @@
 		<modelInstance>wall229<posX>  0</posX><posZ> 13</posZ><rotateY>-1.5708</rotateY></modelInstance>
 	</model>	
 	<model name="door">asset/model/SM_Env_Dwarf_Wall_Archway_01.ply
-		<modelInstance>door01<posX> -11</posX><posZ>-5.5</posZ><rotateY>0</rotateY></modelInstance>
-		<modelInstance>door02<posX>  -8</posX><posZ> 4.5</posZ><rotateY>0</rotateY></modelInstance>
-		<modelInstance>door03<posX>  3.5</posX><posZ> -1</posZ><rotateY>1.5708</rotateY></modelInstance>
-		<modelInstance>door04<posX>-10.5</posX><posZ>  2</posZ><rotateY>1.5708</rotateY></modelInstance>
-		<modelInstance>door05<posX>-10.5</posX><posZ>  5</posZ><rotateY>1.5708</rotateY></modelInstance>
-		<modelInstance>door06<posX> -6.5</posX><posZ>  7</posZ><rotateY>1.5708</rotateY></modelInstance>
-		<modelInstance>door07<posX> -4.5</posX><posZ>  7</posZ><rotateY>1.5708</rotateY></modelInstance>
+		<modelInstance>door01<posX>  -8</posX><posZ> -1</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>door02<posX> -11</posX><posZ>-5.5</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>door03<posX>  -8</posX><posZ> 4.5</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>door04<posX>  3.5</posX><posZ> -1</posZ><rotateY>1.5708</rotateY></modelInstance>
+		<modelInstance>door05<posX>-10.5</posX><posZ>  2</posZ><rotateY>1.5708</rotateY></modelInstance>
+		<modelInstance>door06<posX>-10.5</posX><posZ>  5</posZ><rotateY>1.5708</rotateY></modelInstance>
+		<modelInstance>door07<posX> -6.5</posX><posZ>  7</posZ><rotateY>1.5708</rotateY></modelInstance>
+		<modelInstance>door08<posX> -4.5</posX><posZ>  7</posZ><rotateY>1.5708</rotateY></modelInstance>
 	</model>
 	<model name="skybox">asset/model/UV_Sphere_for_Skybox_inverted_Normals_xyz_uv_n_rgba.ply
 		<modelInstance>skybox<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+	</model>
+	<model name="terrain">asset/model/terrain.ply
+		<modelInstance>terrain<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 </PLYMODEL>
 <EYE_LOCATION>

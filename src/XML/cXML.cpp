@@ -57,10 +57,10 @@ bool cXML::loadModelFromXML(std::string filename, std::map<std::string, cMeshObj
 			instance.erase(std::remove(instance.begin(), instance.end(), '\t'), instance.cend());
 			pModedelInsance->meshName = modelName;
 			pModedelInsance->instanceName = instance;
-			pModedelInsance->position.x = std::stof(node_lv3.child("posX").child_value())*5;
+			pModedelInsance->position.x = std::stof(node_lv3.child("posX").child_value());
 			pModedelInsance->position.y = 0; //pModedelInsance->position.y = std::stof(node_lv3.child("posY").child_value());
-			pModedelInsance->position.z = std::stof(node_lv3.child("posZ").child_value())*5;
-			pModedelInsance->scale = 0.01;
+			pModedelInsance->position.z = std::stof(node_lv3.child("posZ").child_value());
+			//pModedelInsance->scale = 0.01;
 			//pModedelInsance->rotation.x = std::stof(node_lv3.child("rotateX").child_value());
 			pModedelInsance->rotation.y = std::stof(node_lv3.child("rotateY").child_value());
 			//pModedelInsance->rotation.z = std::stof(node_lv3.child("rotateZ").child_value());

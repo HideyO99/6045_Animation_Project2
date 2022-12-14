@@ -482,6 +482,21 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->bUse_RGBA_colour = false;
 			itCurrentMesh->second->textures[0] = textureFile;
 			itCurrentMesh->second->textureRatios[0] = 1;
+			itCurrentMesh->second->scale = 0.01;
+			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
+			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
+			itCurrentMesh->second->isVisible = true;
+		}
+		if ((itCurrentMesh->second->meshName == "terrain"))
+		{
+			itCurrentMesh->second->scale = 20;
+			itCurrentMesh->second->position.x = -250.6;
+			itCurrentMesh->second->position.y = -41.3;
+			itCurrentMesh->second->position.z = 268;
+			itCurrentMesh->second->rotation.y = 0.7;
+			itCurrentMesh->second->isWireframe = false;
+			itCurrentMesh->second->color_RGBA = glm::vec4(1,1,0,1);
+			itCurrentMesh->second->bUse_RGBA_colour = true;
 		}
 	}
 	//cMeshObj* pCurrentMeshObject = itCurrentMesh->second;

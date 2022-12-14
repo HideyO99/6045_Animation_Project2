@@ -180,22 +180,22 @@ int main(void)
     ::g_pTextureManager->setBasePath(TEXTURE_PATH);
     ::g_pTextureManager->create2DTextureFromBMP("Dungeons_2_Texture_01_A.bmp");
     
-    std::string load_texture_error = "";
-    if (g_pTextureManager->createCubeTextureFromBMP("TropicalSunnyDay",
-        "TropicalSunnyDayRight2048.bmp", /* positive X */
-        "TropicalSunnyDayLeft2048.bmp",  /* negative X */
-        "TropicalSunnyDayDown2048.bmp",  /* negative Y */
-        "TropicalSunnyDayUp2048.bmp",    /* positive Y */
-        "TropicalSunnyDayBack2048.bmp",  /* positive Z */
-        "TropicalSunnyDayFront2048.bmp", /* negative Z */
-        true, load_texture_error))
-    {
-        std::cout << "Loaded the tropical sunny day cube map OK" << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR: Didn't load the tropical sunny day cube map.->" << load_texture_error << std::endl;
-    }
+    //std::string load_texture_error = "";
+    //if (g_pTextureManager->createCubeTextureFromBMP("SpaceBox",
+    //    "SpaceBox_right1_posX.bmp", /* positive X */
+    //    "SpaceBox_left2_negX.bmp",  /* negative X */
+    //    "SpaceBox_top3_posY.bmp",    /* positive Y */
+    //    "SpaceBox_bottom4_negY.bmp",  /* negative Y */
+    //    "SpaceBox_front5_posZ.bmp",  /* positive Z */
+    //    "SpaceBox_back6_negZ.bmp", /* negative Z */
+    //    true, load_texture_error))
+    //{
+    //    std::cout << "Loaded the tropical sunny day cube map OK" << std::endl;
+    //}
+    //else
+    //{
+    //    std::cout << "ERROR: Didn't load the tropical sunny day cube map.->" << load_texture_error << std::endl;
+    //}
     //setup object
     //result = pVAOManager->setInstanceObjVisible("terrain01", true);
    // result = pVAOManager->setInstanceObjRGB("floor", glm::vec4(1.f,1.f,1.f,1.f));
@@ -266,11 +266,11 @@ int main(void)
     //result = pVAOManager->setInstanceObjVisible("light3", false);
     //result = pVAOManager->setInstanceObjVisible("light4", false);
 
-    //light0Setup(); //lamp
-    //light1Setup();
-    //light2Setup();
-    //light3Setup();
-    //light4Setup();
+    light0Setup(); //lamp
+    light1Setup();
+    light2Setup();
+    light3Setup();
+    light4Setup();
 
 
 
@@ -525,7 +525,7 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
         pCurrentMeshObject->textureRatios[3]);
 
     //cube map texture
-    GLuint cubeMapTextureNumber = g_pTextureManager->getTexttureID("TropicalSunnyDay");
+    GLuint cubeMapTextureNumber = g_pTextureManager->getTexttureID("SpaceBox");
     GLuint texture30Unit = 30;
     glActiveTexture(texture30Unit + GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTextureNumber);
