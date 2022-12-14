@@ -45,6 +45,10 @@ public:
 
 	bool setIslandModelFlag(std::string meshObjName, bool flag);
 
+	bool setUseRGBColorFlag(std::string meshObjName, bool flag);
+
+	bool setDungeonTexture(std::string meshObjName, std::string textureFile);
+
 	std::map<std::string, cMeshObj*> mapInstanceNametoMeshObj;
 	std::vector<cMeshObj*> pVecInstanceMeshObj;
 	glm::vec3 cameraEyeFromXML;

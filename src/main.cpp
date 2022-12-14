@@ -90,7 +90,8 @@ int main(void)
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-    window = glfwCreateWindow(mode->width, mode->height, "6028 Final", pMainScreen, NULL);
+    //window = glfwCreateWindow(mode->width, mode->height, "6028 Final", pMainScreen, NULL); //full screen
+    window = glfwCreateWindow(1280, 800, "6028 Final", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -177,14 +178,14 @@ int main(void)
     //load texture
     ::g_pTextureManager = new cTextureManager();
     ::g_pTextureManager->setBasePath(TEXTURE_PATH);
-    ::g_pTextureManager->create2DTextureFromBMP("cobblestones_stencil_mask.bmp");
-
+    ::g_pTextureManager->create2DTextureFromBMP("Dungeons_2_Texture_01_A.bmp");
+    
     std::string load_texture_error = "";
     if (g_pTextureManager->createCubeTextureFromBMP("TropicalSunnyDay",
         "TropicalSunnyDayRight2048.bmp", /* positive X */
         "TropicalSunnyDayLeft2048.bmp",  /* negative X */
-        "TropicalSunnyDayUp2048.bmp",    /* positive Y */
         "TropicalSunnyDayDown2048.bmp",  /* negative Y */
+        "TropicalSunnyDayUp2048.bmp",    /* positive Y */
         "TropicalSunnyDayBack2048.bmp",  /* positive Z */
         "TropicalSunnyDayFront2048.bmp", /* negative Z */
         true, load_texture_error))
@@ -197,22 +198,29 @@ int main(void)
     }
     //setup object
     //result = pVAOManager->setInstanceObjVisible("terrain01", true);
-    result = pVAOManager->setInstanceObjRGB("terrain01", glm::vec4(1.f,1.f,1.f,1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("terrain01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("terrain01", 20);
-    result = pVAOManager->setTexture("terrain01", "cobblestones_stencil_mask.bmp", 0);
+   // result = pVAOManager->setInstanceObjRGB("floor", glm::vec4(1.f,1.f,1.f,1.f));
+   // result = pVAOManager->setInstanceObjSpecularPower("floor", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
+   // //result = pVAOManager->setInstanceObjScale("terrain01", 20);
+   // result = pVAOManager->setUseRGBColorFlag("floor", false);
+   //result = pVAOManager->setTexture("floor", "Dungeons_2_Texture_01_A.bmp", 0);
+   result = pVAOManager->setDungeonTexture("floorA", "Dungeons_2_Texture_01_A.bmp");
+   //result = pVAOManager->setTexture("floor", "Dungeons_2_Texture_01_A.bmp", 1);
+
+   //result = pVAOManager->setTextureRatio("floor",0, 1);
+   //result = pVAOManager->setTextureRatio("floor", 1, 1);
+
 
    // result = pVAOManager->setInstanceObjVisible("sphere01", true);
-    result = pVAOManager->setInstanceObjRGB("traffic", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("traffic", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("traffic", 2);
+    //result = pVAOManager->setInstanceObjRGB("traffic", glm::vec4(1.f, 1.f, 1.f, 1.f));
+    //result = pVAOManager->setInstanceObjSpecularPower("traffic", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
+    //result = pVAOManager->setInstanceObjScale("traffic", 2);
 
     //result = pVAOManager->setInstanceObjRGB("skybox", glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
     //result = pVAOManager->setInstanceObjSpecularPower("skybox", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
     //result = pVAOManager->setInstanceObjScale("skybox", 0.4);
     result = pVAOManager->setSkyBoxFlag("skybox",true);
 
-    result = pVAOManager->setInstanceObjRGB("building02", glm::vec4(1.f, 0.8f, 0.5f, 1.f));
+    /*result = pVAOManager->setInstanceObjRGB("building02", glm::vec4(1.f, 0.8f, 0.5f, 1.f));
     result = pVAOManager->setInstanceObjSpecularPower("building02", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
     result = pVAOManager->setInstanceObjScale("building02", 0.3);
 
@@ -251,49 +259,20 @@ int main(void)
     result = pVAOManager->setInstanceObjScale("lamp03", 1.5);
     result = pVAOManager->setInstanceObjRGB("lamp04", glm::vec4(1.f, 1.f, 1.f, 1.f));
     result = pVAOManager->setInstanceObjSpecularPower("lamp04", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("lamp04",1.5);
+    result = pVAOManager->setInstanceObjScale("lamp04",1.5);*/
 
-    result = pVAOManager->setInstanceObjVisible("light1", false);
-    result = pVAOManager->setInstanceObjVisible("light2", false);
-    result = pVAOManager->setInstanceObjVisible("light3", false);
-    result = pVAOManager->setInstanceObjVisible("light4", false);
+    //result = pVAOManager->setInstanceObjVisible("light1", false);
+    //result = pVAOManager->setInstanceObjVisible("light2", false);
+    //result = pVAOManager->setInstanceObjVisible("light3", false);
+    //result = pVAOManager->setInstanceObjVisible("light4", false);
 
-    light0Setup(); //lamp
-    light1Setup();
-    light2Setup();
-    light3Setup();
-    light4Setup();
+    //light0Setup(); //lamp
+    //light1Setup();
+    //light2Setup();
+    //light3Setup();
+    //light4Setup();
 
-    //result = pVAOManager->setInstanceObjWireframe("sphere01", true);
-    //result = pVAOManager->setInstanceObjWireframe("sphere01", true);
 
-    ////result = pVAOManager->setInstanceObjVisible("sphere02", true);
-    //result = pVAOManager->setInstanceObjRGB("sphere02", glm::vec4(1.f, 0.f, 0.f, 1.f));
-    //result = pVAOManager->setInstanceObjWireframe("sphere02", true);
-
-    ////result = pVAOManager->setInstanceObjVisible("sphere03", true);
-    //result = pVAOManager->setInstanceObjRGB("sphere03", glm::vec4(0.f, 1.f, 0.f, 1.f));
-    //result = pVAOManager->setInstanceObjWireframe("sphere03", true);
-
-    ////result = pVAOManager->setInstanceObjVisible("sphere04", true);
-    //result = pVAOManager->setInstanceObjRGB("sphere04", glm::vec4(0.f, 0.f, 1.f, 1.f));
-    //result = pVAOManager->setInstanceObjWireframe("sphere04", true);
-
-    ////result = pVAOManager->setInstanceObjVisible("sphere05", true);
-    //result = pVAOManager->setInstanceObjRGB("sphere05", glm::vec4(0.f, 1.f, 1.f, 1.f));
-    //result = pVAOManager->setInstanceObjWireframe("sphere05", true);
-    ////result = pVAOManager->setInstanceObjVisible("terrain02", true);
-    ////result = pVAOManager->setInstanceObjScale("terrain02", 0.5);
-
-    //GLint mvp_location = glGetUniformLocation(shaderID, "MVP");       // program
-    //// uniform mat4 mModel;
-    //// uniform mat4 mView;
-    //// uniform mat4 mProjection;
-    //GLint mModel_location = glGetUniformLocation(shaderID, "mModel");
-    //GLint mView_location = glGetUniformLocation(shaderID, "mView");
-    //GLint mProjection_location = glGetUniformLocation(shaderID, "mProjection");
-    //// Need this for lighting
-    //GLint mModelInverseTransform_location = glGetUniformLocation(shaderID, "mModelInverseTranspose");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -366,6 +345,9 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
         itCurrentMesh++)
     {
         cMeshObj* pCurrentMeshObject = (itCurrentMesh->second);        // * is the iterator access thing
+
+        //pCurrentMeshObject->textureRatios[0] -= 0.001f;
+        //pCurrentMeshObject->textureRatios[1] += 0.001f;
 
         if (!pCurrentMeshObject->isVisible)
         {
@@ -536,7 +518,7 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
     glBindTexture(GL_TEXTURE_2D, texture06_Number);
     pShaderManager->setShaderUniform1i("texture6", texture06_Unit);
 
-    pShaderManager->setShaderUniform4f("trxRatio_0_3",
+    pShaderManager->setShaderUniform4f("texRatio_0_3",
         pCurrentMeshObject->textureRatios[0],
         pCurrentMeshObject->textureRatios[1],
         pCurrentMeshObject->textureRatios[2],

@@ -391,6 +391,7 @@ bool cVAOManager::setTexture(std::string meshObjName, std::string textureFile, i
 		return false;
 	}
 	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	pCurrentMeshObject->bUse_RGBA_colour = false;
 	pCurrentMeshObject->textures[arrPos] = textureFile;
 	pCurrentMeshObject->textureRatios[arrPos] = 1.0f;
 
@@ -453,3 +454,40 @@ bool cVAOManager::setIslandModelFlag(std::string meshObjName, bool flag)
 	return true;
 }
 
+bool cVAOManager::setUseRGBColorFlag(std::string meshObjName, bool flag)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	pCurrentMeshObject->bUse_RGBA_colour = flag;
+
+	return true;
+}
+
+bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string textureFile)
+{
+	//std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	//if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	//{
+	//	return false;
+	//}
+	for (std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.begin(); itCurrentMesh != mapInstanceNametoMeshObj.end(); itCurrentMesh++)
+	{
+		if ((itCurrentMesh->second->meshName == "floorA") || (itCurrentMesh->second->meshName == "floorB") || (itCurrentMesh->second->meshName == "floorC")||
+			(itCurrentMesh->second->meshName == "wall") || (itCurrentMesh->second->meshName == "door"))
+		{
+			itCurrentMesh->second->bUse_RGBA_colour = false;
+			itCurrentMesh->second->textures[0] = textureFile;
+			itCurrentMesh->second->textureRatios[0] = 1;
+		}
+	}
+	//cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	//pCurrentMeshObject->bUse_RGBA_colour = false;
+	//pCurrentMeshObject->textures[arrPos] = textureFile;
+	//pCurrentMeshObject->textureRatios[arrPos] = 1.0f;
+
+	return true;
+}
