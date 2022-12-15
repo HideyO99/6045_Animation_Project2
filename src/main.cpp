@@ -215,7 +215,7 @@ int main(void)
    result = pVAOManager->setTexture("water", "photos_2018_7_4_fst_water-blue.bmp", 0);
    result = pVAOManager->setInstanceObjRGB("water", glm::vec4(1.f, 1.f, 1.f, 0.5f));
    result = pVAOManager->setTorchTexture("flame", "glowing-fire-flame.bmp", "glowing-fire-flame_bw.bmp");
-   result = pVAOManager->setInstanceObjLighting("water", false);
+   
    result = pVAOManager->setIslandModelFlag("water", true);
 
    //result = pVAOManager->setTextureRatio("floor", 1, 1);
