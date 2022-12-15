@@ -182,6 +182,7 @@ int main(void)
     ::g_pTextureManager->create2DTextureFromBMP("lroc_color_poles_4k.bmp");
     ::g_pTextureManager->create2DTextureFromBMP("glowing-fire-flame.bmp");
     ::g_pTextureManager->create2DTextureFromBMP("glowing-fire-flame_bw.bmp");
+    ::g_pTextureManager->create2DTextureFromBMP("photos_2018_7_4_fst_water-blue.bmp");
     
     std::string load_texture_error = "";
     if (g_pTextureManager->createCubeTextureFromBMP("SpaceBox",
@@ -211,10 +212,11 @@ int main(void)
    result = pVAOManager->setInstanceObjPosition("moon", glm::vec4(200.f,200.f,-100.f,0.f));
    result = pVAOManager->setInstanceObjScale("moon", 10);
    result = pVAOManager->setInstanceObjLighting("moon", false);
-
+   result = pVAOManager->setTexture("water", "photos_2018_7_4_fst_water-blue.bmp", 0);
+   result = pVAOManager->setInstanceObjRGB("water", glm::vec4(1.f, 1.f, 1.f, 0.5f));
    result = pVAOManager->setTorchTexture("flame", "glowing-fire-flame.bmp", "glowing-fire-flame_bw.bmp");
-
-   result = pVAOManager->setInstanceObjLighting("flame", false);
+   result = pVAOManager->setInstanceObjLighting("water", false);
+   result = pVAOManager->setIslandModelFlag("water", true);
 
    //result = pVAOManager->setTextureRatio("floor", 1, 1);
 

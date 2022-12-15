@@ -75,30 +75,30 @@ void main()
 		return;
 	}
 
-	if ( bIsIlandModel )
-	{
-	
-		if ( fVertWorldLocation.y < -25.0f )
-		{	// Water
-			pixelOutputColor.rgb = vec3(0.0f, 0.0f, 1.0f);
-		}
-		else if ( fVertWorldLocation.y < -15.0f )
-		{	// Sand ( 89.8% red, 66.67% green and 43.92% )
-			pixelOutputColor.rgb = vec3(0.898f, 0.6667f, 0.4392f);
-		}
-		else if ( fVertWorldLocation.y < 30.0f )
-		{	// Grass
-			pixelOutputColor.rgb = vec3(0.0f, 1.0f, 0.0f);
-		}
-		else
-		{	// Snow
-			pixelOutputColor.rgb = vec3(1.0f, 1.0f, 1.0f);
-		}
-		pixelOutputColor.a = 1.0f;
-	
-	
-		return;
-	}
+//	if ( bIsIlandModel )
+//	{
+//	
+//		if ( fVertWorldLocation.y < -25.0f )
+//		{	// Water
+//			pixelOutputColor.rgb = vec3(0.0f, 0.0f, 1.0f);
+//		}
+//		else if ( fVertWorldLocation.y < -15.0f )
+//		{	// Sand ( 89.8% red, 66.67% green and 43.92% )
+//			pixelOutputColor.rgb = vec3(0.898f, 0.6667f, 0.4392f);
+//		}
+//		else if ( fVertWorldLocation.y < 30.0f )
+//		{	// Grass
+//			pixelOutputColor.rgb = vec3(0.0f, 1.0f, 0.0f);
+//		}
+//		else
+//		{	// Snow
+//			pixelOutputColor.rgb = vec3(1.0f, 1.0f, 1.0f);
+//		}
+//		pixelOutputColor.a = 1.0f;
+//	
+//	
+//		return;
+//	}
 
 	vec4 finalObjectColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	
@@ -240,4 +240,19 @@ void main()
 	//materialColor = vec3(0.5f,0.5f,0.5f);
 	vec3 ambient = 0.15 * materialColor;
 	pixelOutputColor.rgb += ambient;
+
+
+	if(bIsIlandModel)
+	{
+	// Make the objects 'refractive' (like a see through glass or water or diamond...)
+	vec3 R_eyeVector = normalize(eyeLocation.xyz - fVertWorldLocation.xyz);
+	// genType reflect(	genType IncidentVector, genType Normal);
+	// (index of refraction for diamond is 2.417 according to wikipedia)
+	// (index of refraction for water is 1.333 according to wikipedia)
+	vec3 STU_Vector = refract(R_eyeVector, fNormal.xyz, 1.0f/1.333f);
+	
+	vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
+	pixelOutputColor.rgb *= 0.00001f;
+	pixelOutputColor.rgb += cubeMapColour.rgb;
+	}
 }

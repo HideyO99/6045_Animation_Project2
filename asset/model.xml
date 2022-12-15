@@ -517,7 +517,9 @@
 		<modelInstance>flame4<posX>-11.8</posX><posZ>-4.5</posZ><rotateY>0</rotateY></modelInstance>
 		<modelInstance>flame5<posX> -9.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
 		<modelInstance>flame6<posX> -1.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
-
+	</model>
+	<model name="water">asset/model/water_terrain.ply
+		<modelInstance>water<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 </PLYMODEL>
 <EYE_LOCATION>
