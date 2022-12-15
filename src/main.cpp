@@ -59,7 +59,7 @@ static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
 void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
 void light0Setup();
-void light1Setup();
+void light1Setup(cVAOManager* pVAOManager);
 void light2Setup();
 void light3Setup();
 void light4Setup();
@@ -180,6 +180,8 @@ int main(void)
     ::g_pTextureManager->setBasePath(TEXTURE_PATH);
     ::g_pTextureManager->create2DTextureFromBMP("Dungeons_2_Texture_01_A.bmp");
     ::g_pTextureManager->create2DTextureFromBMP("lroc_color_poles_4k.bmp");
+    ::g_pTextureManager->create2DTextureFromBMP("glowing-fire-flame.bmp");
+    ::g_pTextureManager->create2DTextureFromBMP("glowing-fire-flame_bw.bmp");
     
     std::string load_texture_error = "";
     if (g_pTextureManager->createCubeTextureFromBMP("SpaceBox",
@@ -210,9 +212,10 @@ int main(void)
    result = pVAOManager->setInstanceObjScale("moon", 10);
    result = pVAOManager->setInstanceObjLighting("moon", false);
 
-   //result = pVAOManager->setTexture("floor", "Dungeons_2_Texture_01_A.bmp", 1);
+   result = pVAOManager->setTorchTexture("flame", "glowing-fire-flame.bmp", "glowing-fire-flame_bw.bmp");
 
-   //result = pVAOManager->setTextureRatio("floor",0, 1);
+   result = pVAOManager->setInstanceObjLighting("flame", false);
+
    //result = pVAOManager->setTextureRatio("floor", 1, 1);
 
 
@@ -273,7 +276,7 @@ int main(void)
     //result = pVAOManager->setInstanceObjVisible("light4", false);
 
     light0Setup(); // Dir light
-    //light1Setup();
+    light1Setup(pVAOManager);
     //light2Setup();
     //light3Setup();
     //light4Setup();
@@ -398,15 +401,43 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
     pShaderManager->setShaderUniform1f("bIsFlameObject", (GLfloat)GL_TRUE);
     glDepthMask(GL_FALSE);
 #endif
-#if 0   //discard texture
-    pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_TRUE);
-#endif
 
-    //GLuint texture07_Number = g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[7]);
-    //GLuint texture07_Unit = 7;
-    //glActiveTexture(texture07_Unit + GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, texture07_Number);
-    //pShaderManager->setShaderUniform1i("texture7", texture07_Unit);
+    if (pCurrentMeshObject->meshName == "flame")
+    {
+        pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_TRUE);
+
+        if ((pCurrentMeshObject->scale < 8.5))
+        {
+            pCurrentMeshObject->scale += 0.05f;
+            g_pTheLightManager->plight[1]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
+            g_pTheLightManager->plight[2]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
+            g_pTheLightManager->plight[3]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
+            g_pTheLightManager->plight[4]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
+            g_pTheLightManager->plight[5]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
+            g_pTheLightManager->plight[6]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
+        }
+        else
+        {
+            pCurrentMeshObject->scale = 7;
+            g_pTheLightManager->plight[1]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+            g_pTheLightManager->plight[2]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+            g_pTheLightManager->plight[3]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+            g_pTheLightManager->plight[4]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+            g_pTheLightManager->plight[5]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+            g_pTheLightManager->plight[6]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+        }
+        
+    }
+    else
+    {
+        pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_FALSE);
+    }
+
+    GLuint texture07_Number = g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[7]);
+    GLuint texture07_Unit = 7;
+    glActiveTexture(texture07_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture07_Number);
+    pShaderManager->setShaderUniform1i("texture7", texture07_Unit);
 
     glm::mat4x4 matModel = mat_PARENT_Model;
     // Move the object 
@@ -573,42 +604,6 @@ void light0Setup() //lamp
     ::g_pTheLightManager->plight[0]->turnON = 1;
 
 
-    //::g_pTheLightManager->plight[1]->type = cLight::LightType::LIGHT_POINT;
-    //::g_pTheLightManager->plight[1]->diffuse = glm::vec4(100.0f, 100.f, 100.f, 1.0f);
-    //::g_pTheLightManager->plight[1]->position = glm::vec4(260.f, 200.f, -300.f, 1.0f);
-    //::g_pTheLightManager->plight[1]->attenuation = glm::vec4(1.0f, 0.001f, 0.00001f, 1.0f);
-    //::g_pTheLightManager->plight[1]->turnON = 1; 
-
-    //::g_pTheLightManager->plight[0]->position = glm::vec4(6.8f, 2.7f, -1.8f, 1.0f);
-    //::g_pTheLightManager->plight[0]->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //::g_pTheLightManager->plight[0]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    //::g_pTheLightManager->plight[0]->type = cLight::LightType::LIGHT_SPOT;
-    //::g_pTheLightManager->plight[0]->direction = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    //// inner and outer angles
-    //::g_pTheLightManager->plight[0]->angle.x = 10.0f;     // Degrees
-    //::g_pTheLightManager->plight[0]->angle.y = 20.0f;     // Degrees
-    //::g_pTheLightManager->plight[0]->turnON = 1;
-
-    //::g_pTheLightManager->plight[1]->position = glm::vec4(13.35f, 2.7f, 5.02f, 1.0f);
-    //::g_pTheLightManager->plight[1]->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //::g_pTheLightManager->plight[1]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    //::g_pTheLightManager->plight[1]->type = cLight::LightType::LIGHT_SPOT;
-    //::g_pTheLightManager->plight[1]->direction = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    //// inner and outer angles
-    //::g_pTheLightManager->plight[1]->angle.x = 10.0f;     // Degrees
-    //::g_pTheLightManager->plight[1]->angle.y = 20.0f;     // Degrees
-    //::g_pTheLightManager->plight[1]->turnON = 1;
-
-    //::g_pTheLightManager->plight[2]->position = glm::vec4(14.75f, 2.7f, 13.15f, 1.0f);
-    //::g_pTheLightManager->plight[2]->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //::g_pTheLightManager->plight[2]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    //::g_pTheLightManager->plight[2]->type = cLight::LightType::LIGHT_SPOT;
-    //::g_pTheLightManager->plight[2]->direction = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    //// inner and outer angles
-    //::g_pTheLightManager->plight[2]->angle.x = 10.0f;     // Degrees
-    //::g_pTheLightManager->plight[2]->angle.y = 20.0f;     // Degrees
-    //::g_pTheLightManager->plight[2]->turnON = 1;
-
     //::g_pTheLightManager->plight[3]->position = glm::vec4(1.95f, 2.7f, -0.75f, 1.f);
     //::g_pTheLightManager->plight[3]->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     //::g_pTheLightManager->plight[3]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
@@ -620,21 +615,46 @@ void light0Setup() //lamp
     //::g_pTheLightManager->plight[3]->turnON = 1;
 }
 
-void light1Setup()
+void light1Setup(cVAOManager* pVAOManager)
 {
-    //cDirLight* pDirLight = new cDirLight(*::g_pTheLightManager->plight[1]);
-    //*pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    //*pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //*pDirLight->pSpecular = glm::vec4(0.f, 0.5f, 0.5f, 1.f);
-    //*pDirLight->pTurnON = 1;
+    glm::vec4 atten = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
+    glm::vec4 diffuse = glm::vec4(20.0f, 7.5f, 0.0f, 1.0f);
+    
+    ::g_pTheLightManager->plight[1]->type = cLight::LightType::LIGHT_POINT;
+    ::g_pTheLightManager->plight[1]->diffuse = diffuse;
+    ::g_pTheLightManager->plight[1]->position = pVAOManager->getInstanceObjPosition("debug_light1");
+    ::g_pTheLightManager->plight[1]->attenuation = atten;
+    ::g_pTheLightManager->plight[1]->turnON = 1;
+
+    ::g_pTheLightManager->plight[2]->type = cLight::LightType::LIGHT_POINT;
+    ::g_pTheLightManager->plight[2]->diffuse = diffuse;
+    ::g_pTheLightManager->plight[2]->position = pVAOManager->getInstanceObjPosition("debug_light2");
+    ::g_pTheLightManager->plight[2]->attenuation = atten;
+    ::g_pTheLightManager->plight[2]->turnON = 1;
+
+    ::g_pTheLightManager->plight[3]->type = cLight::LightType::LIGHT_POINT;
+    ::g_pTheLightManager->plight[3]->diffuse = diffuse;
+    ::g_pTheLightManager->plight[3]->position = pVAOManager->getInstanceObjPosition("debug_light3");
+    ::g_pTheLightManager->plight[3]->attenuation = atten;
+    ::g_pTheLightManager->plight[3]->turnON = 1;
+
     ::g_pTheLightManager->plight[4]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[4]->diffuse = glm::vec4(12.0f, 0.3f, 0.3f, 1.0f);
-    ::g_pTheLightManager->plight[4]->position = glm::vec4(18.75f, 14.f, 3.65f, 1.0f);
-    ::g_pTheLightManager->plight[4]->attenuation = glm::vec4(5.0f, 2.f, 0.5f, 1.0f);
+    ::g_pTheLightManager->plight[4]->diffuse = diffuse;
+    ::g_pTheLightManager->plight[4]->position = pVAOManager->getInstanceObjPosition("debug_light4");
+    ::g_pTheLightManager->plight[4]->attenuation = atten;
     ::g_pTheLightManager->plight[4]->turnON = 1;
 
+    ::g_pTheLightManager->plight[5]->type = cLight::LightType::LIGHT_POINT;
+    ::g_pTheLightManager->plight[5]->diffuse = diffuse;
+    ::g_pTheLightManager->plight[5]->position = pVAOManager->getInstanceObjPosition("debug_light5");
+    ::g_pTheLightManager->plight[5]->attenuation = atten;
+    ::g_pTheLightManager->plight[5]->turnON = 1;
 
-
+    ::g_pTheLightManager->plight[6]->type = cLight::LightType::LIGHT_POINT;
+    ::g_pTheLightManager->plight[6]->diffuse = diffuse;
+    ::g_pTheLightManager->plight[6]->position = pVAOManager->getInstanceObjPosition("debug_light6");
+    ::g_pTheLightManager->plight[6]->attenuation = atten;
+    ::g_pTheLightManager->plight[6]->turnON = 1;
 }
 void light2Setup()
 {

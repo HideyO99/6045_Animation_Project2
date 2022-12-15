@@ -33,6 +33,8 @@ public:
 
 	bool setInstanceObjPosition(std::string meshObjName, glm::vec4 value);
 
+	glm::vec4 getInstanceObjPosition(std::string meshObjName);
+
 	cMeshObj* findMeshObjAddr(std::string meshObjName);
 
 	bool setTexture(std::string meshObjName, std::string textureFile, int arrPos);
@@ -48,6 +50,8 @@ public:
 	bool setUseRGBColorFlag(std::string meshObjName, bool flag);
 
 	bool setDungeonTexture(std::string meshObjName, std::string textureFile);
+
+	bool setTorchTexture(std::string meshObjName, std::string textureFile, std::string markTextureFile);
 
 	std::map<std::string, cMeshObj*> mapInstanceNametoMeshObj;
 	std::vector<cMeshObj*> pVecInstanceMeshObj;

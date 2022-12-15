@@ -491,6 +491,34 @@
 	<model name="moon">asset/model/UV_Sphere_Cylindrical_UIV_Projection_.ply
 		<modelInstance>moon<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
+	
+	<model name="torch">asset/model/SM_Prop_Dwarf_Torch_01.ply
+		<modelInstance>torch01<posX>-5.5</posX><posZ>   8</posZ><rotateY>      0</rotateY></modelInstance>
+		<modelInstance>torch02<posX> -11</posX><posZ> 3.5</posZ><rotateY> 1.5708</rotateY></modelInstance>
+		<modelInstance>torch03<posX> 8.5</posX><posZ>  -3</posZ><rotateY>  3.141</rotateY></modelInstance>
+		<modelInstance>torch04<posX> -12</posX><posZ>-4.5</posZ><rotateY>-1.5708</rotateY></modelInstance>
+		<modelInstance>torch05<posX>-9.5</posX><posZ>  11</posZ><rotateY>  3.141</rotateY></modelInstance>
+		<modelInstance>torch06<posX>-1.5</posX><posZ>  11</posZ><rotateY>  3.141</rotateY></modelInstance>
+	</model>
+	
+	<model name="debug_light">asset/model/ISO_Shphere_flat_3div_xyz_n_rgba_uv.ply
+		<modelInstance>debug_light1<posX> -5.5</posX><posZ> 7.8</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>debug_light2<posX>-11.2</posX><posZ> 3.5</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>debug_light3<posX>  8.5</posX><posZ>-2.8</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>debug_light4<posX>-11.8</posX><posZ>-4.5</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>debug_light5<posX> -9.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>debug_light6<posX> -1.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
+	</model>
+	
+	<model name="flame">asset/model/imposter_model.ply
+		<modelInstance>flame1<posX> -5.5</posX><posZ> 7.8</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>flame2<posX>-11.2</posX><posZ> 3.5</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>flame3<posX>  8.5</posX><posZ>-2.8</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>flame4<posX>-11.8</posX><posZ>-4.5</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>flame5<posX> -9.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>flame6<posX> -1.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
+
+	</model>
 </PLYMODEL>
 <EYE_LOCATION>
 	<x>-60</x>

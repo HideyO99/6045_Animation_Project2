@@ -372,6 +372,18 @@ bool cVAOManager::setInstanceObjPosition(std::string meshObjName, glm::vec4 valu
 
 	return true;
 }
+glm::vec4 cVAOManager::getInstanceObjPosition(std::string meshObjName)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return glm::vec4(0);
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	
+	return glm::vec4(pCurrentMeshObject->position,1.f);
+
+}
 
 cMeshObj* cVAOManager::findMeshObjAddr(std::string meshObjName)
 {
@@ -477,7 +489,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 	for (std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.begin(); itCurrentMesh != mapInstanceNametoMeshObj.end(); itCurrentMesh++)
 	{
 		if ((itCurrentMesh->second->meshName == "floorA") || (itCurrentMesh->second->meshName == "floorB") || (itCurrentMesh->second->meshName == "floorC")||
-			(itCurrentMesh->second->meshName == "wall") || (itCurrentMesh->second->meshName == "door"))
+			(itCurrentMesh->second->meshName == "wall") || (itCurrentMesh->second->meshName == "door") )
 		{
 			itCurrentMesh->second->bUse_RGBA_colour = false;
 			itCurrentMesh->second->textures[0] = textureFile;
@@ -486,6 +498,28 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
 			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
 			itCurrentMesh->second->isVisible = true;
+		}
+		if ((itCurrentMesh->second->meshName == "torch"))
+		{
+			itCurrentMesh->second->bUse_RGBA_colour = false;
+			itCurrentMesh->second->textures[0] = textureFile;
+			itCurrentMesh->second->textureRatios[0] = 1;
+			itCurrentMesh->second->scale = 0.03;
+			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
+			itCurrentMesh->second->position.y = 3.f;
+			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
+			itCurrentMesh->second->isVisible = true;
+		}
+		if ((itCurrentMesh->second->meshName == "debug_light"))
+		{
+			itCurrentMesh->second->bUse_RGBA_colour = false;
+			itCurrentMesh->second->textures[0] = textureFile;
+			itCurrentMesh->second->textureRatios[0] = 1;
+			itCurrentMesh->second->scale = 0.5;
+			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
+			itCurrentMesh->second->position.y = 4.f;
+			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
+			itCurrentMesh->second->isVisible = false;
 		}
 		if ((itCurrentMesh->second->meshName == "terrain"))
 		{
@@ -504,5 +538,26 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 	//pCurrentMeshObject->textures[arrPos] = textureFile;
 	//pCurrentMeshObject->textureRatios[arrPos] = 1.0f;
 
+	return true;
+}
+
+bool cVAOManager::setTorchTexture(std::string meshObjName, std::string textureFile, std::string markTextureFile)
+{
+	for (std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.begin(); itCurrentMesh != mapInstanceNametoMeshObj.end(); itCurrentMesh++)
+	{
+		if ((itCurrentMesh->second->meshName == "flame"))
+		{
+			itCurrentMesh->second->bUse_RGBA_colour = false;
+			itCurrentMesh->second->textures[0] = textureFile;
+			itCurrentMesh->second->textures[7] = markTextureFile;
+			itCurrentMesh->second->textureRatios[0] = 1;
+			itCurrentMesh->second->scale = 7.5;
+			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
+			itCurrentMesh->second->position.y = 4.5f;
+			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
+			itCurrentMesh->second->isVisible = true;
+			itCurrentMesh->second->bDoNotLight = true;
+		}
+	}
 	return true;
 }
