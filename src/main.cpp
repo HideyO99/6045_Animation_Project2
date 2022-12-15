@@ -30,7 +30,7 @@
 #define TEXTURE_PATH            "asset/texture"
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
-glm::vec3 g_cameraTarget = glm::vec3(-16.0f, 47.0f, 0.0f);
+glm::vec3 g_cameraTarget = glm::vec3(-16.0f, 4.0f, 0.0f);
 glm::vec3 g_upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 g_cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 bool bIsWalkAround = false;

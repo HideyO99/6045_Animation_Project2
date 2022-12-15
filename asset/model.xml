@@ -484,7 +484,7 @@
 	<model name="skybox">asset/model/UV_Sphere_for_Skybox_inverted_Normals_xyz_uv_n_rgba.ply
 		<modelInstance>skybox<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
-	<model name="terrain">asset/model/terrain.ply
+	<model name="terrain">asset/model/almost_flat_terrain.ply
 		<modelInstance>terrain<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 	
@@ -518,12 +518,12 @@
 		<modelInstance>flame5<posX> -9.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
 		<modelInstance>flame6<posX> -1.5</posX><posZ>11.2</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
-	<model name="water">asset/model/water_terrain.ply
+	<model name="water">asset/model/water_terrain1.ply
 		<modelInstance>water<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 </PLYMODEL>
 <EYE_LOCATION>
-	<x>-60</x>
-	<y>14</y>
-	<z>151</z>
+	<x>-18</x>
+	<y>115</y>
+	<z>145</z>
 </EYE_LOCATION>
