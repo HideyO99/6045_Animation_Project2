@@ -534,12 +534,12 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 		}
 		if ((itCurrentMesh->second->meshName == "water"))
 		{
-			itCurrentMesh->second->scale = 20;
-			itCurrentMesh->second->position.x = 0.f;
+			itCurrentMesh->second->scale = 1.1f;
+			itCurrentMesh->second->position.x = -167.7f;
 			itCurrentMesh->second->position.y = -10.5f;
-			itCurrentMesh->second->position.z = 0.f;
-			itCurrentMesh->second->rotation.y = -3.4f;
-			itCurrentMesh->second->rotation.z = 0.2f;
+			itCurrentMesh->second->position.z = -54.f;
+			itCurrentMesh->second->rotation.y = -5.9f;
+			itCurrentMesh->second->rotation.z = 0.0f;
 			itCurrentMesh->second->isWireframe = false;
 			itCurrentMesh->second->color_RGBA = glm::vec4(1, 1, 0, 1);
 			itCurrentMesh->second->bUse_RGBA_colour = true;
