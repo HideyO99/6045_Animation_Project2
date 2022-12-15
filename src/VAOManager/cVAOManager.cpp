@@ -544,6 +544,18 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->color_RGBA = glm::vec4(1, 1, 0, 1);
 			itCurrentMesh->second->bUse_RGBA_colour = true;
 		}
+		if ((itCurrentMesh->second->meshName == "boss"))
+		{
+			itCurrentMesh->second->scale = 0.8;
+			itCurrentMesh->second->position.x = -27.5f;
+			itCurrentMesh->second->position.y = 1.f;
+			itCurrentMesh->second->position.z = 0.f;
+			itCurrentMesh->second->rotation.y = 3.141f;
+			itCurrentMesh->second->rotation.z = 0.0f;
+			itCurrentMesh->second->isWireframe = false;
+			itCurrentMesh->second->color_RGBA = glm::vec4(1, 1, 0, 1);
+			itCurrentMesh->second->bUse_RGBA_colour = true;
+		}
 	}
 	//cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
 	//pCurrentMeshObject->bUse_RGBA_colour = false;

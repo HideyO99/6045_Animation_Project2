@@ -10,9 +10,9 @@ public:
 
 	enum LightType
 	{
-		LIGHT_POINT,
-		LIGHT_SPOT,
-		LIGHT_DIRECTION,
+		LIGHT_POINT = 0,
+		LIGHT_SPOT = 1,
+		LIGHT_DIRECTION = 2,
 		LIGHT_UNDEF = 0xFF
 	};
 

@@ -60,7 +60,7 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
 void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
 void light0Setup();
 void light1Setup(cVAOManager* pVAOManager);
-void light2Setup();
+void light2Setup(cVAOManager* pVAOManager);
 void light3Setup();
 void light4Setup();
 
@@ -182,8 +182,9 @@ int main(void)
     ::g_pTextureManager->create2DTextureFromBMP("lroc_color_poles_4k.bmp");
     ::g_pTextureManager->create2DTextureFromBMP("glowing-fire-flame.bmp");
     ::g_pTextureManager->create2DTextureFromBMP("glowing-fire-flame_bw.bmp");
-    ::g_pTextureManager->create2DTextureFromBMP("photos_2018_7_4_fst_water-blue.bmp");
-    
+    ::g_pTextureManager->create2DTextureFromBMP("photos_2018_7_4_fst_water-blue.bmp"); 
+    ::g_pTextureManager->create2DTextureFromBMP("Beholder_Base_color.bmp");
+
     std::string load_texture_error = "";
     if (g_pTextureManager->createCubeTextureFromBMP("SpaceBox",
         "SpaceBox_right1_posX.bmp", /* positive X */
@@ -218,6 +219,7 @@ int main(void)
    
    result = pVAOManager->setIslandModelFlag("water", true);
 
+   result = pVAOManager->setTexture("boss", "Beholder_Base_color.bmp", 0);
    //result = pVAOManager->setTextureRatio("floor", 1, 1);
 
 
@@ -278,8 +280,8 @@ int main(void)
     //result = pVAOManager->setInstanceObjVisible("light4", false);
 
     light0Setup(); // Dir light
-    light1Setup(pVAOManager);
-    //light2Setup();
+    light1Setup(pVAOManager);// torch
+    light2Setup(pVAOManager); //beholder eye
     //light3Setup();
     //light4Setup();
 
@@ -364,6 +366,13 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
         {
             // Skip the rest of the loop
             continue;
+        }
+        if (pCurrentMeshObject->instanceName == "boss")
+        {
+            g_pTheLightManager->plight[7]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-0.4f, 1.4f, 0, 0);
+            g_pTheLightManager->plight[8]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(0.7f, 1.2f, -0.3f, 0);
+            g_pTheLightManager->plight[9]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-2.5f, -0.2f, 0, 0);
+
         }
         if (pCurrentMeshObject->isIslandModel)
         {
@@ -599,11 +608,11 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
 void light0Setup() //lamp
 {
     //Directional light
-    ::g_pTheLightManager->plight[0]->direction = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    ::g_pTheLightManager->plight[0]->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ::g_pTheLightManager->plight[0]->specular = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-    ::g_pTheLightManager->plight[0]->type = cLight::LightType::LIGHT_DIRECTION;
-    ::g_pTheLightManager->plight[0]->turnON = 1;
+    cDirLight* pDirLight = new cDirLight(*::g_pTheLightManager->plight[0]);
+    *pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    *pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    *pDirLight->pSpecular = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    *pDirLight->pTurnON = 1;
 
 
     //::g_pTheLightManager->plight[3]->position = glm::vec4(1.95f, 2.7f, -0.75f, 1.f);
@@ -658,37 +667,67 @@ void light1Setup(cVAOManager* pVAOManager)
     ::g_pTheLightManager->plight[6]->attenuation = atten;
     ::g_pTheLightManager->plight[6]->turnON = 1;
 }
-void light2Setup()
+void light2Setup(cVAOManager* pVAOManager)
 {
-    cDirLight* pDirLight = new cDirLight(*::g_pTheLightManager->plight[5]);
-    *pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    *pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    *pDirLight->pSpecular = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    *pDirLight->pTurnON = 1;
+    //cDirLight* pDirLight = new cDirLight(*::g_pTheLightManager->plight[5]);
+    //*pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    //*pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //*pDirLight->pSpecular = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    //*pDirLight->pTurnON = 1;
+
+    ::g_pTheLightManager->plight[7]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
+    ::g_pTheLightManager->plight[7]->diffuse = glm::vec4(2.0f, 0.f, 0.f, 1.0f);
+    ::g_pTheLightManager->plight[7]->attenuation = glm::vec4(1.19f, 0.1f, 0.2f, 1.0f);
+    ::g_pTheLightManager->plight[7]->type = cLight::LightType::LIGHT_SPOT;
+    ::g_pTheLightManager->plight[7]->direction = glm::vec4(-100.f, 0.f, 0.f, 1.0f);
+    // inner and outer angles
+    ::g_pTheLightManager->plight[7]->angle.x = 5.0f;     // Degrees
+    ::g_pTheLightManager->plight[7]->angle.y = 5.0f;     // Degrees
+    ::g_pTheLightManager->plight[7]->turnON = 1;
+
+    ::g_pTheLightManager->plight[8]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
+    ::g_pTheLightManager->plight[8]->diffuse = glm::vec4(0.f, 1.f, 0.f, 1.0f);
+    ::g_pTheLightManager->plight[8]->attenuation = glm::vec4(1.19f, 0.1f, 0.2f, 1.0f);
+    ::g_pTheLightManager->plight[8]->type = cLight::LightType::LIGHT_SPOT;
+    ::g_pTheLightManager->plight[8]->direction = glm::vec4(100.f, -0.5f, 0.f, 1.0f);
+    // inner and outer angles
+    ::g_pTheLightManager->plight[8]->angle.x = 5.0f;     // Degrees
+    ::g_pTheLightManager->plight[8]->angle.y = 5.0f;     // Degrees
+    ::g_pTheLightManager->plight[8]->turnON = 1;
+
+    ::g_pTheLightManager->plight[9]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
+    ::g_pTheLightManager->plight[9]->diffuse = glm::vec4(0.f, 0.f, 1.0f, 1.0f);
+    ::g_pTheLightManager->plight[9]->attenuation = glm::vec4(1.19f, 0.1f, 0.2f, 1.0f);
+    ::g_pTheLightManager->plight[9]->type = cLight::LightType::LIGHT_SPOT;
+    ::g_pTheLightManager->plight[9]->direction = glm::vec4(0.f, -0.5f, 100.f, 1.0f);
+    // inner and outer angles
+    ::g_pTheLightManager->plight[9]->angle.x = 5.0f;     // Degrees
+    ::g_pTheLightManager->plight[9]->angle.y = 5.0f;     // Degrees
+    ::g_pTheLightManager->plight[9]->turnON = 1;
 }
 
 void light3Setup()
 {
 
-    ::g_pTheLightManager->plight[6]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
-    ::g_pTheLightManager->plight[6]->diffuse = glm::vec4(0.8f, .50f, 0.4f, 1.0f);
-    ::g_pTheLightManager->plight[6]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    ::g_pTheLightManager->plight[6]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[6]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
-    // inner and outer angles
-    ::g_pTheLightManager->plight[6]->angle.x = 10.0f;     // Degrees
-    ::g_pTheLightManager->plight[6]->angle.y = 20.0f;     // Degrees
-    ::g_pTheLightManager->plight[6]->turnON = 1;
+    //::g_pTheLightManager->plight[6]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
+    //::g_pTheLightManager->plight[6]->diffuse = glm::vec4(0.8f, .50f, 0.4f, 1.0f);
+    //::g_pTheLightManager->plight[6]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
+    //::g_pTheLightManager->plight[6]->type = cLight::LightType::LIGHT_SPOT;
+    //::g_pTheLightManager->plight[6]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
+    //// inner and outer angles
+    //::g_pTheLightManager->plight[6]->angle.x = 10.0f;     // Degrees
+    //::g_pTheLightManager->plight[6]->angle.y = 20.0f;     // Degrees
+    //::g_pTheLightManager->plight[6]->turnON = 1;
 
-    ::g_pTheLightManager->plight[7]->position = glm::vec4(15.0f, 0.6f, 9.5f, 1.0f);
-    ::g_pTheLightManager->plight[7]->diffuse = glm::vec4(0.8f, .50f, 0.4f, 1.0f);
-    ::g_pTheLightManager->plight[7]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    ::g_pTheLightManager->plight[7]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[7]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
-    // inner and outer angles
-    ::g_pTheLightManager->plight[7]->angle.x = 10.0f;     // Degrees
-    ::g_pTheLightManager->plight[7]->angle.y = 20.0f;     // Degrees
-    ::g_pTheLightManager->plight[7]->turnON = 1;
+    //::g_pTheLightManager->plight[7]->position = glm::vec4(15.0f, 0.6f, 9.5f, 1.0f);
+    //::g_pTheLightManager->plight[7]->diffuse = glm::vec4(0.8f, .50f, 0.4f, 1.0f);
+    //::g_pTheLightManager->plight[7]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
+    //::g_pTheLightManager->plight[7]->type = cLight::LightType::LIGHT_SPOT;
+    //::g_pTheLightManager->plight[7]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
+    //// inner and outer angles
+    //::g_pTheLightManager->plight[7]->angle.x = 10.0f;     // Degrees
+    //::g_pTheLightManager->plight[7]->angle.y = 20.0f;     // Degrees
+    //::g_pTheLightManager->plight[7]->turnON = 1;
 
 }
 
