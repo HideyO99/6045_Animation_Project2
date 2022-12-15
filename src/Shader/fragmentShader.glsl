@@ -236,23 +236,25 @@ void main()
 		finalObjectColor.rgb += (materialColor.rgb * lightDiffuseContrib.rgb) + (specularColour.rgb  * lightSpecularContrib.rgb );
 	}
 
+	vec4 pixelOutput_tmp;
+	if(bIsIlandModel)
+	{
+		// Make the objects 'refractive' (like a see through glass or water or diamond...)
+		vec3 R_eyeVector = normalize(eyeLocation.xyz - fVertWorldLocation.xyz);
+		// genType reflect(	genType IncidentVector, genType Normal);
+		// (index of refraction for diamond is 2.417 according to wikipedia)
+		// (index of refraction for water is 1.333 according to wikipedia)
+		vec3 STU_Vector = refract(R_eyeVector, fNormal.xyz, 1.0f/2.417f);
+		
+		vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
+		//pixelOutputColor.rgb *= 0.00001f;
+		//pixelOutputColor.rgb += cubeMapColour.rgb;
+		pixelOutput_tmp.rgb *=0.00001f;
+		pixelOutput_tmp.rgb += cubeMapColour.rgb;
+	}
 	pixelOutputColor = vec4(finalObjectColor.rgb, alphaTransparency);
 	//materialColor = vec3(0.5f,0.5f,0.5f);
 	vec3 ambient = 0.15 * materialColor;
 	pixelOutputColor.rgb += ambient;
-
-
-	if(bIsIlandModel)
-	{
-	// Make the objects 'refractive' (like a see through glass or water or diamond...)
-	vec3 R_eyeVector = normalize(eyeLocation.xyz - fVertWorldLocation.xyz);
-	// genType reflect(	genType IncidentVector, genType Normal);
-	// (index of refraction for diamond is 2.417 according to wikipedia)
-	// (index of refraction for water is 1.333 according to wikipedia)
-	vec3 STU_Vector = refract(R_eyeVector, fNormal.xyz, 1.0f/1.333f);
-	
-	vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
-	pixelOutputColor.rgb *= 0.00001f;
-	pixelOutputColor.rgb += cubeMapColour.rgb;
-	}
+	pixelOutputColor.rgb += pixelOutput_tmp.rgb;
 }

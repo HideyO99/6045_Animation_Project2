@@ -762,22 +762,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     //move camera
     // AWSD AD-Left, Right
     //      WS-Forward, Back
-    const float CAMERA_MOVE_SPEED = 1.f;
+    const float CAMERA_MOVE_SPEED = 5.f;
     if (key == GLFW_KEY_A)
     {
-        ::g_cameraEye.x -= CAMERA_MOVE_SPEED;
+        //::g_cameraEye.x -= CAMERA_MOVE_SPEED;
+        ::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
     }
     if (key == GLFW_KEY_D)
     {
-        ::g_cameraEye.x += CAMERA_MOVE_SPEED;
+        //::g_cameraEye.x += CAMERA_MOVE_SPEED;
+        ::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
     }
     if (key == GLFW_KEY_W)
     {
-        ::g_cameraEye.z -= CAMERA_MOVE_SPEED;
+        //::g_cameraEye.z -= CAMERA_MOVE_SPEED;
+        ::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
     }
     if (key == GLFW_KEY_S)
     {
-        ::g_cameraEye.z += CAMERA_MOVE_SPEED;
+        //::g_cameraEye.z += CAMERA_MOVE_SPEED;
+        ::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
     }
     if (key == GLFW_KEY_Q)
     {
