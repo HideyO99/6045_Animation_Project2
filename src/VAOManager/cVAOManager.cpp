@@ -556,6 +556,17 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->color_RGBA = glm::vec4(1, 1, 0, 1);
 			itCurrentMesh->second->bUse_RGBA_colour = true;
 		}
+
+		if ((itCurrentMesh->second->meshName == "projecter"))
+		{
+			itCurrentMesh->second->bUse_RGBA_colour = false;
+			itCurrentMesh->second->textures[0] = textureFile;
+			itCurrentMesh->second->textureRatios[0] = 1;
+			itCurrentMesh->second->scale = 0.03;
+			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x;//* 5;
+			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z;//* 5;
+			itCurrentMesh->second->isVisible = true;
+		}
 	}
 	//cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
 	//pCurrentMeshObject->bUse_RGBA_colour = false;

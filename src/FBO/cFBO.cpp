@@ -21,7 +21,7 @@ bool cFBO::init(int width, int height, std::string& error)
 
 	GLfloat black[] = { 0.f,0.f,0.f,0.f };
 
-	glCreateFramebuffers(1, &(this->ID));
+	glGenFramebuffers(1, &(this->ID));
 	glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
 
 	//color buffer(texture)
@@ -39,7 +39,7 @@ bool cFBO::init(int width, int height, std::string& error)
 	//vertex world position
 	glGenTextures(1, &(this->vertexWorldPositionID));
 	glBindTexture(GL_TEXTURE_2D, this->vertexWorldPositionID);
-	glTextureStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -51,7 +51,7 @@ bool cFBO::init(int width, int height, std::string& error)
 	//depth buffer
 	glGenTextures(1, &(this->depthTextureID));
 	glBindTexture(GL_TEXTURE_2D, this->depthTextureID);
-	glTextureStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, this->width, this->height);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, this->width, this->height);
 
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, this->colorTextureID,0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, this->vertexWorldPositionID, 0);
@@ -61,7 +61,7 @@ bool cFBO::init(int width, int height, std::string& error)
 
 	//check FrameBuffer status is ready
 	bool bFBOReadyStatus = false;
-
+	
 	switch (glCheckFramebufferStatus(GL_FRAMEBUFFER))
 	{
 	case GL_FRAMEBUFFER_COMPLETE:
@@ -107,7 +107,6 @@ bool cFBO::init(int width, int height, std::string& error)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	return bFBOReadyStatus;
-
 }
 
 void cFBO::shutdown()

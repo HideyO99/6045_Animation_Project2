@@ -111,6 +111,12 @@
     <ClCompile Include="src\FBO\cFBO.cpp">
       <Filter>FBO</Filter>
     </ClCompile>
+    <ClCompile Include="src\drawOBJ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lightSetup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GUI\cGUI.h">

@@ -144,9 +144,11 @@
     <ClCompile Include="dev\inc\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="dev\inc\imgui\imgui_tables.cpp" />
     <ClCompile Include="dev\inc\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\drawOBJ.cpp" />
     <ClCompile Include="src\FBO\cFBO.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\GUI\cGUI.cpp" />
+    <ClCompile Include="src\lightSetup.cpp" />
     <ClCompile Include="src\Light\cLight.cpp" />
     <ClCompile Include="src\Light\cLightManager.cpp" />
     <ClCompile Include="src\main.cpp" />

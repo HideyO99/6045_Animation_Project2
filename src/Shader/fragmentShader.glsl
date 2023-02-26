@@ -9,11 +9,17 @@ in vec4 fBinormal;
 
 #define MAX_LIGHT_SOURCE 10
 out vec4 pixelOutputColor;
+out vec4 FBO_vertexWorldPos;
 
 uniform bool bUseRGBA_Color;
 uniform bool bIsFlameObject;
 
 uniform bool bUseDiscardTexture;
+
+uniform sampler2D samplerFBO_COLOR_TEXTURE_01;		// Color texture from the FBO
+uniform sampler2D samplerFBO_VertexWorldPosition;		// Color texture from the FBO
+uniform vec2 FBO_size_width_height;					// x = width, y = height
+uniform vec2 screen_width_height;					// x = width, y = height
 
 uniform vec4 debugColour;
 
@@ -46,14 +52,14 @@ uniform vec4 specularColour;			// RGB object hightlight COLOUR
 										//	1 = not shiny 
 										// 10 = "meh" shiny
 
-uniform sampler2D texture0;		// "Brick texture"
-uniform sampler2D texture1;		// "Lady Gaga"
-uniform sampler2D texture2;		// "Lady Gaga"
-uniform sampler2D texture3;		// "Lady Gaga"
-uniform sampler2D texture4;		// "Brick texture"
-uniform sampler2D texture5;		// "Lady Gaga"
-uniform sampler2D texture6;		// "Lady Gaga"
-uniform sampler2D texture7;		// "Lady Gaga"
+uniform sampler2D texture0;		
+uniform sampler2D texture1;		
+uniform sampler2D texture2;		
+uniform sampler2D texture3;		
+uniform sampler2D texture4;		
+uniform sampler2D texture5;		
+uniform sampler2D texture6;		
+uniform sampler2D texture7;		
 
 uniform vec4 texRatio_0_3;		// x = texture0, y = texture1, etc. 0 to 1
 uniform vec4 texRatio_4_7;		// 0 to 1
@@ -72,6 +78,9 @@ void main()
 		vec3 cubeMapColor = texture( skyboxTexture, fNormal.xyz ).rgb;
 		pixelOutputColor.rgb = cubeMapColor.rgb;
 		pixelOutputColor.a = 1.0f;
+
+		FBO_vertexWorldPos = vec4(0.f);
+		
 		return;
 	}
 
@@ -119,7 +128,7 @@ void main()
 		float RGBcolorSum = pixelOutputColor.r + pixelOutputColor.g + pixelOutputColor.b;
 		pixelOutputColor.a = max( ((RGBcolorSum - 0.1f) / 3.0f), 0.0f);
 	
-	
+		FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
 		// Exit early so bypasses lighting
 		return;
 	}
@@ -163,6 +172,7 @@ void main()
 		// Set the output colour and exit early
 		// (Don't apply the lighting to this)
 		pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
+		FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
 		return;
 	}
 	// calculateLightContribute
@@ -257,4 +267,9 @@ void main()
 	vec3 ambient = 0.15 * materialColor;
 	pixelOutputColor.rgb += ambient;
 	pixelOutputColor.rgb += pixelOutput_tmp.rgb;
+
+	FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
+	FBO_vertexWorldPos *= 0.001f;
+	FBO_vertexWorldPos.rgb = vec3(1.0f, 1.0f, 1.0f);
+
 }

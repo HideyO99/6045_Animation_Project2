@@ -23,11 +23,13 @@
 #include "Light/cLightManager.h"
 #include "GUI/cGUI.h"
 #include "Texture/cTextureManager.h"
+#include "FBO/cFBO.h"
 
 #define MODEL_LIST_XML          "asset/model.xml"
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
 #define TEXTURE_PATH            "asset/texture"
+#define USE_IMGUI false
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
 glm::vec3 g_cameraTarget = glm::vec3(-16.0f, 4.0f, 0.0f);
@@ -45,6 +47,8 @@ cLightManager* g_pTheLightManager = NULL;
 static GLFWwindow* window = nullptr;
 
 cTextureManager* g_pTextureManager = NULL;
+
+cFBO* g_FBO_01 = NULL;
 
 
 static void error_callback(int error, const char* description)
@@ -90,8 +94,8 @@ int main(void)
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-    //window = glfwCreateWindow(mode->width, mode->height, "6028 Final", pMainScreen, NULL); //full screen
-    window = glfwCreateWindow(1280, 800, "6028 Final", NULL, NULL);
+    //window = glfwCreateWindow(mode->width, mode->height, "6020 Graphic2", pMainScreen, NULL); //full screen
+    window = glfwCreateWindow(1280, 800, "6020 Graphic2", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -108,6 +112,7 @@ int main(void)
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
+#if USE_IMGUI
     //initialize imgui
     cGUI* gui_ = new cGUI(&g_cameraEye,&g_cameraTarget);
     result = gui_->ImGUI_init(window);
@@ -116,7 +121,23 @@ int main(void)
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
-    
+#endif
+
+    ::g_FBO_01 = new cFBO();
+    int screenW = 0;
+    int screenH = 0;
+    glfwGetFramebufferSize(window, &screenW, &screenH);
+    std::string error;
+    result = ::g_FBO_01->init(screenW, screenH, error);
+    if (!result)
+    {
+        std::cout << "error: FBO initialization = " << error << std::endl;
+    }
+    else
+    {
+        std::cout << "FBO initialization -> done " << error << std::endl;
+    }
+
     //create shader program
     cShaderManager* pShaderManager = new cShaderManager();
     cShaderManager::cShader vertexShader;
@@ -150,10 +171,13 @@ int main(void)
 
     
     ::g_pTheLightManager->loadLightUniformLocation(shaderID);
+#if USE_IMGUI
     for (size_t i = 0; i < MAX_LIGHT_SOURCE; i++)
     {
         gui_->pLight[i] = ::g_pTheLightManager->plight[i];
     }
+#endif
+
     //load model
     cVAOManager* pVAOManager = new cVAOManager();
 
@@ -172,8 +196,10 @@ int main(void)
     }
     ::g_cameraEye = pVAOManager->cameraEyeFromXML;
 
+#if USE_IMGUI
     //gui_->pMapInstanceNametoMeshObj = &pVAOManager->mapInstanceNametoMeshObj;
     gui_->pVecInstanceMeshObj = &pVAOManager->pVecInstanceMeshObj;
+#endif
 
     //load texture
     ::g_pTextureManager = new cTextureManager();
@@ -202,12 +228,7 @@ int main(void)
         std::cout << "ERROR: Didn't load the tropical sunny day cube map.->" << load_texture_error << std::endl;
     }
     //setup object
-    //result = pVAOManager->setInstanceObjVisible("terrain01", true);
-   // result = pVAOManager->setInstanceObjRGB("floor", glm::vec4(1.f,1.f,1.f,1.f));
-   // result = pVAOManager->setInstanceObjSpecularPower("floor", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-   // //result = pVAOManager->setInstanceObjScale("terrain01", 20);
-   // result = pVAOManager->setUseRGBColorFlag("floor", false);
-   //result = pVAOManager->setTexture("floor", "Dungeons_2_Texture_01_A.bmp", 0);
+
    result = pVAOManager->setDungeonTexture("floorA", "Dungeons_2_Texture_01_A.bmp");
    result = pVAOManager->setTexture("moon", "lroc_color_poles_4k.bmp", 0);
    result = pVAOManager->setInstanceObjPosition("moon", glm::vec4(200.f,200.f,-100.f,0.f));
@@ -220,64 +241,8 @@ int main(void)
    result = pVAOManager->setIslandModelFlag("water", true);
 
    result = pVAOManager->setTexture("boss", "Beholder_Base_color.bmp", 0);
-   //result = pVAOManager->setTextureRatio("floor", 1, 1);
 
-
-   // result = pVAOManager->setInstanceObjVisible("sphere01", true);
-    //result = pVAOManager->setInstanceObjRGB("traffic", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    //result = pVAOManager->setInstanceObjSpecularPower("traffic", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    //result = pVAOManager->setInstanceObjScale("traffic", 2);
-
-    //result = pVAOManager->setInstanceObjRGB("skybox", glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
-    //result = pVAOManager->setInstanceObjSpecularPower("skybox", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    //result = pVAOManager->setInstanceObjScale("skybox", 0.4);
     result = pVAOManager->setSkyBoxFlag("skybox",true);
-
-    /*result = pVAOManager->setInstanceObjRGB("building02", glm::vec4(1.f, 0.8f, 0.5f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("building02", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("building02", 0.3);
-
-    result = pVAOManager->setInstanceObjRGB("building03", glm::vec4(0.1f, 0.1f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("building03", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("building03", 0.1);
-
-    result = pVAOManager->setInstanceObjRGB("Electricbox01", glm::vec4(1.f, 0.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("Electricbox01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("Electricbox01", 0.4);
-
-    result = pVAOManager->setInstanceObjRGB("mac01", glm::vec4(1.f, 0.f, 0.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("mac01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("mac01", 1);
-
-    result = pVAOManager->setInstanceObjRGB("truck01", glm::vec4(0.65f, 0.45f, 0.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("truck01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("truck01", 0.7);
-
-    result = pVAOManager->setInstanceObjRGB("road01", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("road01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("road01", 2);
-
-    result = pVAOManager->setInstanceObjRGB("road02", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("road02", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("road02", 2);
-
-    result = pVAOManager->setInstanceObjRGB("lamp01", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("lamp01", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("lamp01", 1.5);
-    result = pVAOManager->setInstanceObjRGB("lamp02", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("lamp02", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("lamp02", 1.5);
-    result = pVAOManager->setInstanceObjRGB("lamp03", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("lamp03", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("lamp03", 1.5);
-    result = pVAOManager->setInstanceObjRGB("lamp04", glm::vec4(1.f, 1.f, 1.f, 1.f));
-    result = pVAOManager->setInstanceObjSpecularPower("lamp04", glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f));
-    result = pVAOManager->setInstanceObjScale("lamp04",1.5);*/
-
-    //result = pVAOManager->setInstanceObjVisible("light1", false);
-    //result = pVAOManager->setInstanceObjVisible("light2", false);
-    //result = pVAOManager->setInstanceObjVisible("light3", false);
-    //result = pVAOManager->setInstanceObjVisible("light4", false);
 
     light0Setup(); // Dir light
     light1Setup(pVAOManager);// torch
@@ -297,12 +262,16 @@ int main(void)
         glm::mat4x4 matProjection;
         glm::mat4x4 matView;
 
-        glfwGetFramebufferSize(window, &width, &height);
-        ratio = width / (float)height;
+        //glfwGetFramebufferSize(window, &width, &height);
+        //ratio = width / (float)height;
 
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glViewport(0, 0, width, height);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //FBO
+        glBindFramebuffer(GL_FRAMEBUFFER, ::g_FBO_01->ID);
+        glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
+        ::g_FBO_01->clearBuffer(0);
        
 
         //glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -321,14 +290,29 @@ int main(void)
 
         glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
 
-        matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 10000.0f);
-        //matProjection = glm::perspective(0.6f, ratio, 0.1f, 10000.0f);
-        //glUniformMatrix4fv(mView_location, 1, GL_FALSE, glm::value_ptr(matView));
-        //glUniformMatrix4fv(mProjection_location, 1, GL_FALSE, glm::value_ptr(matProjection));
+        float FBO_screenRatio = static_cast<float>(::g_FBO_01->width) / ::g_FBO_01->height;
+        matProjection = glm::perspective(glm::radians(fov), FBO_screenRatio, 0.1f, 10000.f);
+        //matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 10000.0f);
+        ////matProjection = glm::perspective(0.6f, ratio, 0.1f, 10000.0f);
+        ////glUniformMatrix4fv(mView_location, 1, GL_FALSE, glm::value_ptr(matView));
+        ////glUniformMatrix4fv(mProjection_location, 1, GL_FALSE, glm::value_ptr(matProjection));
 
         updateInstanceObj(pShaderManager, pVAOManager, matView, matProjection);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::vec3 oldEye = ::g_cameraEye;
+        glm::vec3 oldAt = ::g_cameraTarget;
+
+        ::g_cameraEye = glm::vec3(0.0f, 0.0f, -6.0f);
+        ::g_cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float)height;
+
+#if USE_IMGUI
         gui_->ImGUICreateFrame();
+#endif
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -338,7 +322,9 @@ int main(void)
 
     }
 
+#if USE_IMGUI
     gui_->ImGUI_shutdown();
+#endif
 
     glfwDestroyWindow(window);
 
@@ -396,362 +382,6 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
             pShaderManager->setShaderUniform1f("bIsIlandModel", (GLfloat)GL_FALSE);
         }
     }
-}
-
-void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection)
-{
-    // Don't draw any "back facing" triangles
-    glCullFace(GL_BACK);
-    //glEnable(GL_CULL_FACE);
-    // Turn on depth buffer test at draw time
-    glEnable(GL_DEPTH_TEST);
-
-    //matModel = glm::mat4x4(1.0f);  // identity matrix
-
-#if 0   //flame effect
-    pShaderManager->setShaderUniform1f("bIsFlameObject", (GLfloat)GL_TRUE);
-    glDepthMask(GL_FALSE);
-#endif
-
-    if (pCurrentMeshObject->meshName == "flame")
-    {
-        pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_TRUE);
-
-        if ((pCurrentMeshObject->scale < 8.5))
-        {
-            pCurrentMeshObject->scale += 0.05f;
-            g_pTheLightManager->plight[1]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
-            g_pTheLightManager->plight[2]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
-            g_pTheLightManager->plight[3]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
-            g_pTheLightManager->plight[4]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
-            g_pTheLightManager->plight[5]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
-            g_pTheLightManager->plight[6]->attenuation -= glm::vec4( 0.001,  0.0001,  0.00002, 0);
-        }
-        else
-        {
-            pCurrentMeshObject->scale = 7;
-            g_pTheLightManager->plight[1]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-            g_pTheLightManager->plight[2]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-            g_pTheLightManager->plight[3]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-            g_pTheLightManager->plight[4]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-            g_pTheLightManager->plight[5]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-            g_pTheLightManager->plight[6]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-        }
-        
-    }
-    else
-    {
-        pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_FALSE);
-    }
-
-    GLuint texture07_Number = g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[7]);
-    GLuint texture07_Unit = 7;
-    glActiveTexture(texture07_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture07_Number);
-    pShaderManager->setShaderUniform1i("texture7", texture07_Unit);
-
-    glm::mat4x4 matModel = mat_PARENT_Model;
-    // Move the object 
-    glm::mat4 matTranslation = glm::translate(glm::mat4(1.0f), pCurrentMeshObject->position);
-
-    //std::cout << pCurrentMeshObject->instanceName << " position x = " << pCurrentMeshObject->position.x << " y = " << pCurrentMeshObject->position.y << " z = " << pCurrentMeshObject->position.z << std::endl;
-
-    //rotate
-    glm::mat4 matRoationZ = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 matRoationY = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 matRoationX = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-
-    // Scale the object
-    float uniformScale = pCurrentMeshObject->scale;
-    glm::mat4 matScale = glm::scale(glm::mat4(1.0f), glm::vec3(uniformScale, uniformScale, uniformScale));
-
-    matModel = matModel * matTranslation;
-
-    matModel = matModel * matRoationX;
-    matModel = matModel * matRoationY;
-    matModel = matModel * matRoationZ;
-
-    matModel = matModel * matScale;
-
-    pShaderManager->setShaderUniformM4fv("mModel", matModel);
-    pShaderManager->setShaderUniformM4fv("mView", matView);
-    pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
-
-    glm::mat4 mModelInverseTransform = glm::inverse(glm::transpose(matModel));
-    pShaderManager->setShaderUniformM4fv("mModelInverseTranspose", mModelInverseTransform);
-
-    // Wireframe
-    if (pCurrentMeshObject->isWireframe)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);      // GL_POINT, GL_LINE, GL_FILL
-    }
-    else
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    pShaderManager->setShaderUniform4f("RGBA_Color",
-        pCurrentMeshObject->color_RGBA.r,
-        pCurrentMeshObject->color_RGBA.g,
-        pCurrentMeshObject->color_RGBA.b,
-        pCurrentMeshObject->color_RGBA.w);
-
-    if (pCurrentMeshObject->bUse_RGBA_colour)
-    {
-        pShaderManager->setShaderUniform1f("bUseRGBA_Color", (GLfloat)GL_TRUE);
-    }
-    else
-    {
-        pShaderManager->setShaderUniform1f("bUseRGBA_Color", (GLfloat)GL_FALSE);
-    }
-    pShaderManager->setShaderUniform4f("specularColour",
-        pCurrentMeshObject->specular_colour_and_power.r,
-        pCurrentMeshObject->specular_colour_and_power.g,
-        pCurrentMeshObject->specular_colour_and_power.b,
-        pCurrentMeshObject->specular_colour_and_power.w);
-
-    //uniform bool bDoNotLight;	
-    if (pCurrentMeshObject->bDoNotLight)
-    {
-        pShaderManager->setShaderUniform1f("bDoNotLight", (GLfloat)GL_TRUE);
-    }
-    else
-    {
-        pShaderManager->setShaderUniform1f("bDoNotLight", (GLfloat)GL_FALSE);
-    }
-
-    //set texture0
-    GLuint texture00_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[0]);
-    GLuint texture00_Unit = 0;
-    glActiveTexture(texture00_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture00_Number);
-    pShaderManager->setShaderUniform1i("texture0", texture00_Unit);
-    //set texture1
-    GLuint texture01_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[1]);
-    GLuint texture01_Unit = 1;
-    glActiveTexture(texture01_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture01_Number);
-    pShaderManager->setShaderUniform1i("texture1", texture01_Unit);
-    //set texture2
-    GLuint texture02_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[2]);
-    GLuint texture02_Unit = 2;
-    glActiveTexture(texture02_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture02_Number);
-    pShaderManager->setShaderUniform1i("texture2", texture02_Unit);
-    //set texture3
-    GLuint texture03_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[3]);
-    GLuint texture03_Unit = 3;
-    glActiveTexture(texture03_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture03_Number);
-    pShaderManager->setShaderUniform1i("texture3", texture03_Unit);
-    //set texture4
-    GLuint texture04_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[4]);
-    GLuint texture04_Unit = 4;
-    glActiveTexture(texture04_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture04_Number);
-    pShaderManager->setShaderUniform1i("texture4", texture04_Unit);
-    //set texture5
-    GLuint texture05_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[5]);
-    GLuint texture05_Unit = 5;
-    glActiveTexture(texture05_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture05_Number);
-    pShaderManager->setShaderUniform1i("texture5", texture05_Unit);
-    //set texture6
-    GLuint texture06_Number = ::g_pTextureManager->getTexttureID(pCurrentMeshObject->textures[6]);
-    GLuint texture06_Unit = 6;
-    glActiveTexture(texture06_Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture06_Number);
-    pShaderManager->setShaderUniform1i("texture6", texture06_Unit);
-
-    pShaderManager->setShaderUniform4f("texRatio_0_3",
-        pCurrentMeshObject->textureRatios[0],
-        pCurrentMeshObject->textureRatios[1],
-        pCurrentMeshObject->textureRatios[2],
-        pCurrentMeshObject->textureRatios[3]);
-
-    //cube map texture
-    GLuint cubeMapTextureNumber = g_pTextureManager->getTexttureID("SpaceBox");
-    GLuint texture30Unit = 30;
-    glActiveTexture(texture30Unit + GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTextureNumber);
-    pShaderManager->setShaderUniform1i("skyboxTexture", texture30Unit);
-
-    cModelDrawInfo drawingInformation;
-    if (pVAOManager->FindDrawInfo(pCurrentMeshObject->meshName, drawingInformation))
-    {
-        glBindVertexArray(drawingInformation.VAO_ID);
-
-        glDrawElements(GL_TRIANGLES, drawingInformation.numberOfIndices, GL_UNSIGNED_INT, (void*)0);
-
-        glBindVertexArray(0);
-
-    }
-    else
-    {
-        // Didn't find that model
-        std::cout << "Error: didn't find model to draw." << std::endl;
-
-    }
-
-    for (std::vector<cMeshObj* >::iterator itCurrentMesh = pCurrentMeshObject->vecChildMesh.begin();
-        itCurrentMesh != pCurrentMeshObject->vecChildMesh.end();
-        itCurrentMesh++)
-    {
-        cMeshObj* pCurrentChildMeshObject = *itCurrentMesh;
-        drawObj(pCurrentChildMeshObject, matModel, pShaderManager, pVAOManager, matView, matProjection);
-    }
-}
-
-void light0Setup() //lamp
-{
-    //Directional light
-    cDirLight* pDirLight = new cDirLight(*::g_pTheLightManager->plight[0]);
-    *pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    *pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    *pDirLight->pSpecular = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    *pDirLight->pTurnON = 1;
-
-
-    //::g_pTheLightManager->plight[3]->position = glm::vec4(1.95f, 2.7f, -0.75f, 1.f);
-    //::g_pTheLightManager->plight[3]->diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //::g_pTheLightManager->plight[3]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    //::g_pTheLightManager->plight[3]->type = cLight::LightType::LIGHT_SPOT;
-    //::g_pTheLightManager->plight[3]->direction = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    //// inner and outer angles
-    //::g_pTheLightManager->plight[3]->angle.x = 10.0f;     // Degrees
-    //::g_pTheLightManager->plight[3]->angle.y = 20.0f;     // Degrees
-    //::g_pTheLightManager->plight[3]->turnON = 1;
-}
-
-void light1Setup(cVAOManager* pVAOManager)
-{
-    glm::vec4 atten = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
-    glm::vec4 diffuse = glm::vec4(20.0f, 7.5f, 0.0f, 1.0f);
-    
-    ::g_pTheLightManager->plight[1]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[1]->diffuse = diffuse;
-    ::g_pTheLightManager->plight[1]->position = pVAOManager->getInstanceObjPosition("debug_light1");
-    ::g_pTheLightManager->plight[1]->attenuation = atten;
-    ::g_pTheLightManager->plight[1]->turnON = 1;
-
-    ::g_pTheLightManager->plight[2]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[2]->diffuse = diffuse;
-    ::g_pTheLightManager->plight[2]->position = pVAOManager->getInstanceObjPosition("debug_light2");
-    ::g_pTheLightManager->plight[2]->attenuation = atten;
-    ::g_pTheLightManager->plight[2]->turnON = 1;
-
-    ::g_pTheLightManager->plight[3]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[3]->diffuse = diffuse;
-    ::g_pTheLightManager->plight[3]->position = pVAOManager->getInstanceObjPosition("debug_light3");
-    ::g_pTheLightManager->plight[3]->attenuation = atten;
-    ::g_pTheLightManager->plight[3]->turnON = 1;
-
-    ::g_pTheLightManager->plight[4]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[4]->diffuse = diffuse;
-    ::g_pTheLightManager->plight[4]->position = pVAOManager->getInstanceObjPosition("debug_light4");
-    ::g_pTheLightManager->plight[4]->attenuation = atten;
-    ::g_pTheLightManager->plight[4]->turnON = 1;
-
-    ::g_pTheLightManager->plight[5]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[5]->diffuse = diffuse;
-    ::g_pTheLightManager->plight[5]->position = pVAOManager->getInstanceObjPosition("debug_light5");
-    ::g_pTheLightManager->plight[5]->attenuation = atten;
-    ::g_pTheLightManager->plight[5]->turnON = 1;
-
-    ::g_pTheLightManager->plight[6]->type = cLight::LightType::LIGHT_POINT;
-    ::g_pTheLightManager->plight[6]->diffuse = diffuse;
-    ::g_pTheLightManager->plight[6]->position = pVAOManager->getInstanceObjPosition("debug_light6");
-    ::g_pTheLightManager->plight[6]->attenuation = atten;
-    ::g_pTheLightManager->plight[6]->turnON = 1;
-}
-void light2Setup(cVAOManager* pVAOManager)
-{
-    //cDirLight* pDirLight = new cDirLight(*::g_pTheLightManager->plight[5]);
-    //*pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
-    //*pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    //*pDirLight->pSpecular = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    //*pDirLight->pTurnON = 1;
-
-    ::g_pTheLightManager->plight[7]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
-    ::g_pTheLightManager->plight[7]->diffuse = glm::vec4(2.0f, 0.f, 0.f, 1.0f);
-    ::g_pTheLightManager->plight[7]->attenuation = glm::vec4(1.19f, 0.1f, 0.2f, 1.0f);
-    ::g_pTheLightManager->plight[7]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[7]->direction = glm::vec4(-100.f, 0.f, 0.f, 1.0f);
-    // inner and outer angles
-    ::g_pTheLightManager->plight[7]->angle.x = 5.0f;     // Degrees
-    ::g_pTheLightManager->plight[7]->angle.y = 5.0f;     // Degrees
-    ::g_pTheLightManager->plight[7]->turnON = 1;
-
-    ::g_pTheLightManager->plight[8]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
-    ::g_pTheLightManager->plight[8]->diffuse = glm::vec4(0.f, 1.f, 0.f, 1.0f);
-    ::g_pTheLightManager->plight[8]->attenuation = glm::vec4(1.19f, 0.1f, 0.2f, 1.0f);
-    ::g_pTheLightManager->plight[8]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[8]->direction = glm::vec4(100.f, -0.5f, 0.f, 1.0f);
-    // inner and outer angles
-    ::g_pTheLightManager->plight[8]->angle.x = 5.0f;     // Degrees
-    ::g_pTheLightManager->plight[8]->angle.y = 5.0f;     // Degrees
-    ::g_pTheLightManager->plight[8]->turnON = 1;
-
-    ::g_pTheLightManager->plight[9]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
-    ::g_pTheLightManager->plight[9]->diffuse = glm::vec4(0.f, 0.f, 1.0f, 1.0f);
-    ::g_pTheLightManager->plight[9]->attenuation = glm::vec4(1.19f, 0.1f, 0.2f, 1.0f);
-    ::g_pTheLightManager->plight[9]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[9]->direction = glm::vec4(0.f, -0.5f, 100.f, 1.0f);
-    // inner and outer angles
-    ::g_pTheLightManager->plight[9]->angle.x = 5.0f;     // Degrees
-    ::g_pTheLightManager->plight[9]->angle.y = 5.0f;     // Degrees
-    ::g_pTheLightManager->plight[9]->turnON = 1;
-}
-
-void light3Setup()
-{
-
-    //::g_pTheLightManager->plight[6]->position = glm::vec4(15.6f, 0.6f, 8.7f, 1.0f);
-    //::g_pTheLightManager->plight[6]->diffuse = glm::vec4(0.8f, .50f, 0.4f, 1.0f);
-    //::g_pTheLightManager->plight[6]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    //::g_pTheLightManager->plight[6]->type = cLight::LightType::LIGHT_SPOT;
-    //::g_pTheLightManager->plight[6]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
-    //// inner and outer angles
-    //::g_pTheLightManager->plight[6]->angle.x = 10.0f;     // Degrees
-    //::g_pTheLightManager->plight[6]->angle.y = 20.0f;     // Degrees
-    //::g_pTheLightManager->plight[6]->turnON = 1;
-
-    //::g_pTheLightManager->plight[7]->position = glm::vec4(15.0f, 0.6f, 9.5f, 1.0f);
-    //::g_pTheLightManager->plight[7]->diffuse = glm::vec4(0.8f, .50f, 0.4f, 1.0f);
-    //::g_pTheLightManager->plight[7]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    //::g_pTheLightManager->plight[7]->type = cLight::LightType::LIGHT_SPOT;
-    //::g_pTheLightManager->plight[7]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
-    //// inner and outer angles
-    //::g_pTheLightManager->plight[7]->angle.x = 10.0f;     // Degrees
-    //::g_pTheLightManager->plight[7]->angle.y = 20.0f;     // Degrees
-    //::g_pTheLightManager->plight[7]->turnON = 1;
-
-}
-
-void light4Setup()
-{
-    ::g_pTheLightManager->plight[8]->position = glm::vec4(11.9f, 0.4f, 5.f, 1.0f);
-    ::g_pTheLightManager->plight[8]->diffuse = glm::vec4(1.f, 1.f, 1.f, 1.0f);
-    ::g_pTheLightManager->plight[8]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    ::g_pTheLightManager->plight[8]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[8]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
-    // inner and outer angles    
-    ::g_pTheLightManager->plight[8]->angle.x = 10.0f;     // Degrees
-    ::g_pTheLightManager->plight[8]->angle.y = 20.0f;     // Degrees
-    ::g_pTheLightManager->plight[8]->turnON = 1;
-
-    ::g_pTheLightManager->plight[9]->position = glm::vec4(11.2f, 0.6f, 5.7f, 1.0f);
-    ::g_pTheLightManager->plight[9]->diffuse = glm::vec4(1.f, 1.f, 1.f, 1.0f);
-    ::g_pTheLightManager->plight[9]->attenuation = glm::vec4(0.19f, 0.003f, 0.072f, 1.0f);
-    ::g_pTheLightManager->plight[9]->type = cLight::LightType::LIGHT_SPOT;
-    ::g_pTheLightManager->plight[9]->direction = glm::vec4(0.07f, -0.5f, 1.0f, 1.0f);
-    // inner and outer angle
-    ::g_pTheLightManager->plight[9]->angle.x = 10.0f;     // Degrees
-    ::g_pTheLightManager->plight[9]->angle.y = 20.0f;     // Degrees
-    ::g_pTheLightManager->plight[9]->turnON = 1;
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

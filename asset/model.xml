@@ -527,6 +527,10 @@
 	<model name="boss">asset/model/BeholderSketchfab_xyz_n_rgba_uv.ply
 		<modelInstance>boss<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
+	<model name="projecter">asset/model/SM_Env_Dwarf_Wall_06.ply
+		<modelInstance>projecter1<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+	</model>
+	
 </PLYMODEL>
 <EYE_LOCATION>
 	<x>-18</x>
