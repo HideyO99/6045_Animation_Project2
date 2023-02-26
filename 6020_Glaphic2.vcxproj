@@ -24,7 +24,6 @@
     <ProjectGuid>{43e43f66-7c3b-452c-bf0f-f35b3b0396a4}</ProjectGuid>
     <RootNamespace>My6028final</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>6020_Graphic2</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
