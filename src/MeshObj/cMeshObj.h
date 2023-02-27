@@ -4,6 +4,8 @@
 #include <vector>
 //#include <glm/vec3.hpp>
 
+#define MOVINGTEXTURE true
+
 class cMeshObj
 {
 public:
@@ -25,6 +27,10 @@ public:
 	float textureRatios[8];
 	bool isSkybox;
 	bool isIslandModel;
+#if MOVINGTEXTURE
+	float time;
+	bool isMovingTexture;
+#endif
 
 	std::vector<cMeshObj*> vecChildMesh;
 	

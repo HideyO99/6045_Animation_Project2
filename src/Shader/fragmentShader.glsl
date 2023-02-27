@@ -304,7 +304,9 @@ vec3 GaussianBlurCalculation(int numElement)
 	if(numElement == 0)
 	{
 		//don't blur
+		vec2 texcoord = vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height);
 		pixelColor = texture( samplerFBO_COLOR_TEXTURE_01,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
+		//pixelColor = texture( samplerFBO_VertexWorldPosition,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
 
 	}
 	else

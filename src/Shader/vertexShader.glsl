@@ -23,6 +23,10 @@ uniform mat4 mModelInverseTranspose;		// mModel with Only Rotation;
 uniform mat4 mView;
 uniform mat4 mProjection;
 
+//moving texture
+uniform float time;
+uniform bool bMovingTexture;
+
 void main()
 {
     vec3 vertPosition = vPosition.xyz;
@@ -42,5 +46,8 @@ void main()
     fUVx2 = vUVx2;
     fTangent = vTangent;
     fBinormal = vBiNormal;
-
+    if(bMovingTexture)
+	{
+		fUVx2.st = fUVx2.st+ vec2(time,time);
+	}
 }

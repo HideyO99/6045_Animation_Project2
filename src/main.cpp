@@ -31,6 +31,7 @@
 #define TEXTURE_PATH            "asset/texture"
 #define USE_IMGUI false
 
+
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
 glm::vec3 g_cameraTarget = glm::vec3(-16.0f, 4.0f, 0.0f);
 glm::vec3 g_upVector = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -304,7 +305,7 @@ int main(void)
 
         pShaderManager->setShaderUniformM4fv("mView", matView);
         pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
-
+       
         updateInstanceObj(pShaderManager, pVAOManager);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -348,7 +349,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexWorldPositionID);
         pShaderManager->setShaderUniform1i("samplerFBO_VertexWorldPosition", texture22_Unit);
 
-        pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
+        //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
         glm::mat4 scrMAT = glm::mat4(1.f);
         cMeshObj* scrOBJ = pVAOManager->findMeshObjAddr("projecter1");
         result = pVAOManager->setInstanceObjScale("projecter1", 100.f);
@@ -422,7 +423,19 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
         }
         matModel = glm::mat4x4(1.0f);
 
+#if MOVINGTEXTURE
+        if (pCurrentMeshObject->isMovingTexture)
+        {
+            pShaderManager->setShaderUniform1f("bMovingTexture", (GLfloat)GL_TRUE);
+            pShaderManager->setShaderUniform1f("time", pCurrentMeshObject->time);
+        }
+#endif
+
         drawObj(pCurrentMeshObject, matModel, pShaderManager, pVAOManager);
+
+#if MOVINGTEXTURE
+        pCurrentMeshObject->time += 0.01f;
+#endif
         if (pCurrentMeshObject->isSkybox)
         {
             pShaderManager->setShaderUniform1f("bIsSkyboxObject", (GLfloat)GL_FALSE);
@@ -432,6 +445,9 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
             pShaderManager->setShaderUniform1f("bIsIlandModel", (GLfloat)GL_FALSE);
         }
     }
+#if MOVINGTEXTURE
+    pShaderManager->setShaderUniform1f("bMovingTexture", (GLfloat)GL_FALSE);
+#endif
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

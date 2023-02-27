@@ -498,6 +498,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
 			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
 			itCurrentMesh->second->isVisible = true;
+
 		}
 		if ((itCurrentMesh->second->meshName == "torch"))
 		{
@@ -543,6 +544,9 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->isWireframe = false;
 			itCurrentMesh->second->color_RGBA = glm::vec4(1, 1, 0, 1);
 			itCurrentMesh->second->bUse_RGBA_colour = true;
+#if MOVINGTEXTURE
+			itCurrentMesh->second->isMovingTexture = true;
+#endif
 		}
 		if ((itCurrentMesh->second->meshName == "boss"))
 		{

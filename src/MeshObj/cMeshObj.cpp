@@ -25,6 +25,11 @@ cMeshObj::cMeshObj()
 	this->textureRatios[5] = 0.0f;
 	this->textureRatios[6] = 0.0f;
 	this->textureRatios[7] = 0.0f;
+
+#if MOVINGTEXTURE
+	this->time = 0;
+	this->isMovingTexture = false;
+#endif
 }
 
 cMeshObj::~cMeshObj()
