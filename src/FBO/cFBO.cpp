@@ -21,7 +21,7 @@ bool cFBO::init(int width, int height, std::string& error)
 
 	GLfloat black[] = { 0.f,0.f,0.f,0.f };
 
-	glGenFramebuffers(1, &(this->ID));
+	glCreateFramebuffers(1, &(this->ID));
 	glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
 
 	//color buffer(texture)

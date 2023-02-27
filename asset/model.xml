@@ -527,7 +527,7 @@
 	<model name="boss">asset/model/BeholderSketchfab_xyz_n_rgba_uv.ply
 		<modelInstance>boss<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
-	<model name="projecter">asset/model/SM_Env_Dwarf_Wall_06.ply
+	<model name="projecter">asset/model/Quad_2_sided_aligned_on_XY_plane.ply
 		<modelInstance>projecter1<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 	

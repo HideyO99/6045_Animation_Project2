@@ -122,6 +122,12 @@ void cShaderManager::setShaderUniform1f(std::string name, float value)
 	glUniform1f(lo, value);
 }
 
+void cShaderManager::setShaderUniform2f(std::string name, float value1, float value2)
+{
+	GLint lo = glGetUniformLocation(shaderID, name.c_str());
+	glUniform2f(lo, value1, value2);
+}
+
 void cShaderManager::setShaderUniform4f(std::string name, const float value1, const float value2, const float value3, const float value4)
 {
 	GLint lo = glGetUniformLocation(shaderID, name.c_str());

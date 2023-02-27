@@ -56,6 +56,7 @@ public:
 
 	void setShaderUniformM4fv(std::string name,glm::mat4 value);
 	void setShaderUniform1f(std::string name, float value);
+	void setShaderUniform2f(std::string name, float value1, float value2);
 	void setShaderUniform4f(std::string name,const float value1, const float value2, const float value3, const float value4);
 
 	void setShaderUniform1i(std::string name, int value);

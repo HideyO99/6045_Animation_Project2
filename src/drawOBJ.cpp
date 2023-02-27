@@ -6,11 +6,11 @@
 extern cLightManager* g_pTheLightManager;
 extern cTextureManager* g_pTextureManager;
 
-void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection)
+void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager)
 {
     // Don't draw any "back facing" triangles
     glCullFace(GL_BACK);
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     // Turn on depth buffer test at draw time
     glEnable(GL_DEPTH_TEST);
 
@@ -82,8 +82,8 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
     matModel = matModel * matScale;
 
     pShaderManager->setShaderUniformM4fv("mModel", matModel);
-    pShaderManager->setShaderUniformM4fv("mView", matView);
-    pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
+    //pShaderManager->setShaderUniformM4fv("mView", matView);
+    //pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
 
     glm::mat4 mModelInverseTransform = glm::inverse(glm::transpose(matModel));
     pShaderManager->setShaderUniformM4fv("mModelInverseTranspose", mModelInverseTransform);
@@ -209,6 +209,6 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
         itCurrentMesh++)
     {
         cMeshObj* pCurrentChildMeshObject = *itCurrentMesh;
-        drawObj(pCurrentChildMeshObject, matModel, pShaderManager, pVAOManager, matView, matProjection);
+        drawObj(pCurrentChildMeshObject, matModel, pShaderManager, pVAOManager);
     }
 }

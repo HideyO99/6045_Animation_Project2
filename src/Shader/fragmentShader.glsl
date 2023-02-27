@@ -16,12 +16,19 @@ uniform bool bIsFlameObject;
 
 uniform bool bUseDiscardTexture;
 
+//FBO
 uniform sampler2D samplerFBO_COLOR_TEXTURE_01;		// Color texture from the FBO
 uniform sampler2D samplerFBO_VertexWorldPosition;		// Color texture from the FBO
-uniform vec2 FBO_size_width_height;					// x = width, y = height
+uniform vec2 FBO_width_height;					// x = width, y = height
 uniform vec2 screen_width_height;					// x = width, y = height
+uniform bool bFullScreen;
+uniform float blurAmount;
+uniform vec3 focusPlane;
+const int MAX_KERNEL_1D_SIZE = 20;
 
 uniform vec4 debugColour;
+
+
 
 struct sLight
 {
@@ -71,8 +78,21 @@ uniform bool bIsSkyboxObject;
 // HACK: colour the island
 uniform bool bIsIlandModel;
 
+//function
+vec3 GaussianBlurCalculation(int numElement);
+float gauss(float x, float sigma);
+
 void main()
 {
+	if(bFullScreen)
+	{
+		int GaussianElementNum = int(blurAmount * float(MAX_KERNEL_1D_SIZE));
+		GaussianElementNum = clamp(GaussianElementNum, 0, MAX_KERNEL_1D_SIZE);
+		pixelOutputColor.rgb = GaussianBlurCalculation(GaussianElementNum);
+		pixelOutputColor.a = 1.f;
+		return;
+	}
+
 	if (bIsSkyboxObject)
 	{
 		vec3 cubeMapColor = texture( skyboxTexture, fNormal.xyz ).rgb;
@@ -271,5 +291,50 @@ void main()
 	FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
 	FBO_vertexWorldPos *= 0.001f;
 	FBO_vertexWorldPos.rgb = vec3(1.0f, 1.0f, 1.0f);
+	
+}
 
+vec3 GaussianBlurCalculation(int numElement)
+{
+	float screen_width = screen_width_height.x;
+	float screen_height = screen_width_height.y;
+	vec3 pixelColor = vec3(0.f);
+	float totalGaussianWeightUsed = 0.0f;
+
+	if(numElement == 0)
+	{
+		//don't blur
+		pixelColor = texture( samplerFBO_COLOR_TEXTURE_01,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
+
+	}
+	else
+	{
+
+		for(int i = 0; i <= numElement ; i++)
+		{
+			vec3 pixelColor_R = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x + i)	/screen_width , (gl_FragCoord.y)/screen_height)).rgb; 
+			vec3 pixelColor_L = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x - i)	/screen_width , (gl_FragCoord.y)/screen_height)).rgb; 
+			vec3 pixelColor_U = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y + i)/screen_height)).rgb; 
+			vec3 pixelColor_D = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y - i)/screen_height)).rgb; 
+			float blurWeight = gauss(i,numElement);
+			pixelColor_R.rgb *= blurWeight;
+			pixelColor_L.rgb *= blurWeight;
+			pixelColor_U.rgb *= blurWeight;
+			pixelColor_D.rgb *= blurWeight;
+					
+					// We used 4 weights here
+			totalGaussianWeightUsed += (blurWeight * 4);
+					
+			pixelColor.rgb += pixelColor_R.rgb + pixelColor_L.rgb + pixelColor_U.rgb + pixelColor_D.rgb;
+		}
+		pixelColor.rgb /= totalGaussianWeightUsed;
+
+	}
+	return pixelColor;
+}
+
+float gauss(float x, float sigma) {
+    float coeff = 1.0 / (sqrt(2.0 * 3.14159) * sigma);
+    float exponent = -(x * x) / (2.0 * sigma * sigma);
+    return coeff * exp(exponent);
 }

@@ -49,7 +49,7 @@ static GLFWwindow* window = nullptr;
 cTextureManager* g_pTextureManager = NULL;
 
 cFBO* g_FBO_01 = NULL;
-
+cFBO* g_FBO_02 = NULL;
 
 static void error_callback(int error, const char* description)
 {
@@ -59,9 +59,10 @@ static void error_callback(int error, const char* description)
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void window_size_callback(GLFWwindow* window, int width, int height);
 
-void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
-void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection);
+void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager);
+void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager);
 void light0Setup();
 void light1Setup(cVAOManager* pVAOManager);
 void light2Setup(cVAOManager* pVAOManager);
@@ -104,6 +105,8 @@ int main(void)
 
     std::cout << "created window" << std::endl;
 
+    glfwSetWindowSizeCallback(window, window_size_callback);
+
     glfwSetKeyCallback(window, key_callback);
 
     glfwMakeContextCurrent(window);
@@ -124,11 +127,13 @@ int main(void)
 #endif
 
     ::g_FBO_01 = new cFBO();
+    ::g_FBO_02 = new cFBO();
     int screenW = 0;
     int screenH = 0;
     glfwGetFramebufferSize(window, &screenW, &screenH);
     std::string error;
     result = ::g_FBO_01->init(screenW, screenH, error);
+    result = ::g_FBO_02->init(screenW, screenH, error);
     if (!result)
     {
         std::cout << "error: FBO initialization = " << error << std::endl;
@@ -243,6 +248,7 @@ int main(void)
    result = pVAOManager->setTexture("boss", "Beholder_Base_color.bmp", 0);
 
     result = pVAOManager->setSkyBoxFlag("skybox",true);
+    result = pVAOManager->setInstanceObjVisible("projecter", false); 
 
     light0Setup(); // Dir light
     light1Setup(pVAOManager);// torch
@@ -273,7 +279,6 @@ int main(void)
         glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
         ::g_FBO_01->clearBuffer(0);
        
-
         //glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 cameraDirection = glm::normalize(g_cameraEye - g_cameraTarget);
         glm::vec3 cameraRight = glm::normalize(glm::cross(g_upVector, cameraDirection));
@@ -297,10 +302,14 @@ int main(void)
         ////glUniformMatrix4fv(mView_location, 1, GL_FALSE, glm::value_ptr(matView));
         ////glUniformMatrix4fv(mProjection_location, 1, GL_FALSE, glm::value_ptr(matProjection));
 
-        updateInstanceObj(pShaderManager, pVAOManager, matView, matProjection);
+        pShaderManager->setShaderUniformM4fv("mView", matView);
+        pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
+
+        updateInstanceObj(pShaderManager, pVAOManager);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glm::vec3 oldEye = ::g_cameraEye;
         glm::vec3 oldAt = ::g_cameraTarget;
 
@@ -309,10 +318,51 @@ int main(void)
 
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float)height;
+        pShaderManager->setShaderUniform2f("FBO_width_height", g_FBO_01->width, g_FBO_01->height);
+        pShaderManager->setShaderUniform2f("screen_width_height", (float)width, (float)height);
+        matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 100.f);
+        glViewport(0, 0, width, height);
 
+        if (!bIsWalkAround)
+        {
+
+            matView = glm::lookAt(::g_cameraEye, ::g_cameraTarget, ::g_upVector);
+        }
+        else
+        {
+            matView = glm::lookAt(::g_cameraEye, ::g_cameraEye + ::g_cameraFront, ::g_upVector);
+        }
+
+        glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
+        pShaderManager->setShaderUniformM4fv("mView", matView);
+
+        pShaderManager->setShaderUniform1f("bFullScreen", true);
+        //set FBO to texture
+        GLuint texture21_Unit = 21;
+        glActiveTexture(texture21_Unit + GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->colorTextureID);
+        pShaderManager->setShaderUniform1i("samplerFBO_COLOR_TEXTURE_01", texture21_Unit);
+
+        GLuint texture22_Unit = 22;
+        glActiveTexture(texture22_Unit + GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexWorldPositionID);
+        pShaderManager->setShaderUniform1i("samplerFBO_VertexWorldPosition", texture22_Unit);
+
+        pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
+        glm::mat4 scrMAT = glm::mat4(1.f);
+        cMeshObj* scrOBJ = pVAOManager->findMeshObjAddr("projecter1");
+        result = pVAOManager->setInstanceObjScale("projecter1", 100.f);
+        result = pVAOManager->setInstanceObjVisible("projecter1", true);
+        drawObj(scrOBJ, scrMAT, pShaderManager, pVAOManager);
+        result = pVAOManager->setInstanceObjVisible("projecter1", false);
+        //updateInstanceObj(pShaderManager, pVAOManager);
 #if USE_IMGUI
         gui_->ImGUICreateFrame();
 #endif
+        ::g_cameraEye = oldEye;
+        ::g_cameraTarget = oldAt;
+
+        pShaderManager->setShaderUniform1f("bFullScreen", false);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -335,7 +385,7 @@ int main(void)
     exit(EXIT_SUCCESS);
 }
 
-void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::mat4x4 matView, glm::mat4x4 matProjection)
+void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
 {
     glm::mat4x4 matModel;
 
@@ -372,7 +422,7 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager,
         }
         matModel = glm::mat4x4(1.0f);
 
-        drawObj(pCurrentMeshObject, matModel, pShaderManager, pVAOManager, matView, matProjection);
+        drawObj(pCurrentMeshObject, matModel, pShaderManager, pVAOManager);
         if (pCurrentMeshObject->isSkybox)
         {
             pShaderManager->setShaderUniform1f("bIsSkyboxObject", (GLfloat)GL_FALSE);
@@ -483,5 +533,16 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         fov = 1.0f;
     if (fov > 45.0f)
         fov = 45.0f;
+}
+
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
+    std::string error = "";
+    bool result = ::g_FBO_01->reset(width, height, error);
+    
+    if (!result)
+    {
+        std::cout << "Error: FBO cannot reset: " << error << std::endl;
+    }
 }
 
