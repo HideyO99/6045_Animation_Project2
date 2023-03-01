@@ -9,7 +9,9 @@ in vec4 fBinormal;
 
 #define MAX_LIGHT_SOURCE 10
 out vec4 pixelOutputColor;
+out vec4 FBO_vertexNormal;	
 out vec4 FBO_vertexWorldPos;
+out vec4 FBO_vertexSpecular;
 
 uniform bool bUseRGBA_Color;
 uniform bool bIsFlameObject;
@@ -17,8 +19,13 @@ uniform bool bIsFlameObject;
 uniform bool bUseDiscardTexture;
 
 //FBO
-uniform sampler2D samplerFBO_COLOR_TEXTURE_01;		// Color texture from the FBO
-uniform sampler2D samplerFBO_VertexWorldPosition;		// Color texture from the FBO
+//uniform sampler2D samplerFBO_COLOR_TEXTURE_01;		// Color texture from the FBO
+//uniform sampler2D samplerFBO_VertexWorldPosition;		// Color texture from the FBO
+uniform sampler2D sampler_FBO_vertexMaterialColour;
+uniform sampler2D sampler_FBO_vertexNormal;	
+uniform sampler2D sampler_FBO_vertexWorldPos;
+uniform sampler2D sampler_FBO_vertexSpecular;
+
 uniform vec2 FBO_width_height;					// x = width, y = height
 uniform vec2 screen_width_height;					// x = width, y = height
 uniform bool bFullScreen;
@@ -81,17 +88,76 @@ uniform bool bIsIlandModel;
 //function
 vec3 GaussianBlurCalculation(int numElement);
 float gauss(float x, float sigma);
+vec4 LightCalculation(vec3 vMaterialColor, vec3 vNormal, vec3 vWorldPos, vec4 vSpecular);
 
 void main()
 {
+	//////////////////////////////////////////////////////////////////////////
+	//	2nd pass															//
+	//////////////////////////////////////////////////////////////////////////
 	if(bFullScreen)
 	{
-		int GaussianElementNum = int(blurAmount * float(MAX_KERNEL_1D_SIZE));
-		GaussianElementNum = clamp(GaussianElementNum, 0, MAX_KERNEL_1D_SIZE);
-		pixelOutputColor.rgb = GaussianBlurCalculation(GaussianElementNum);
-		pixelOutputColor.a = 1.f;
+		float screen_width = screen_width_height.x;
+		float screen_height = screen_width_height.y;
+		vec2 textCoords = vec2( gl_FragCoord.x / screen_width, gl_FragCoord.y  / screen_height );
+
+		vec4 vertexColour = texture( sampler_FBO_vertexMaterialColour, textCoords );
+		vec4 vertexNormal = texture( sampler_FBO_vertexNormal, textCoords );
+		vec4 vertexWorldPosition = texture( sampler_FBO_vertexWorldPos, textCoords );
+		vec4 vertexSpecular = texture( sampler_FBO_vertexSpecular, textCoords );
+
+		if(vertexNormal.w == 0.f)
+		{
+			pixelOutputColor = vertexColour;
+			//return;
+		}
+		else
+		{
+			pixelOutputColor = LightCalculation(vertexColour.rgb, vertexNormal.xyz, vertexWorldPosition.xyz, vertexSpecular);
+			vec4 pixelOutput_tmp;
+			if(bIsIlandModel)
+			{
+				// Make the objects 'refractive' (like a see through glass or water or diamond...)
+				vec3 R_eyeVector = normalize(eyeLocation.xyz - vertexWorldPosition.xyz);
+				// genType reflect(	genType IncidentVector, genType Normal);
+				// (index of refraction for diamond is 2.417 according to wikipedia)
+				// (index of refraction for water is 1.333 according to wikipedia)
+				vec3 STU_Vector = refract(R_eyeVector, vertexNormal.xyz, 1.0f/2.417f);
+				//vec3 STU_Vector = refract(R_eyeVector, vertexNormal.xyz, 1.0f/1.333f);
+
+				vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
+				//pixelOutputColor.rgb *= 0.00001f;
+				//pixelOutputColor.rgb += cubeMapColour.rgb;
+				pixelOutput_tmp.rgb *=0.00001f;
+				pixelOutput_tmp.rgb += cubeMapColour.rgb;
+			}
+			pixelOutputColor.a = vertexColour.a;
+
+			vec3 ambient = 0.15 * vertexColour.rgb;
+			pixelOutputColor.rgb += ambient;
+			pixelOutputColor.rgb += pixelOutput_tmp.rgb;
+		}
+		if(blurAmount>0)
+		{
+			int GaussianElementNum = int(blurAmount * float(MAX_KERNEL_1D_SIZE));
+			GaussianElementNum = clamp(GaussianElementNum, 0, MAX_KERNEL_1D_SIZE);
+			pixelOutputColor.rgb = GaussianBlurCalculation(GaussianElementNum);
+			pixelOutputColor.a = 1.f;
+		}
+
+		//
 		return;
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//	1st pass															//
+	//////////////////////////////////////////////////////////////////////////
+	pixelOutputColor = vec4(0.0f);
+	FBO_vertexNormal = vec4(0.0f);
+	FBO_vertexWorldPos = vec4(0.0f);
+	FBO_vertexSpecular = vec4(0.0f);
+
+
 
 	if (bIsSkyboxObject)
 	{
@@ -99,44 +165,11 @@ void main()
 		pixelOutputColor.rgb = cubeMapColor.rgb;
 		pixelOutputColor.a = 1.0f;
 
-		FBO_vertexWorldPos = vec4(0.f);
+		FBO_vertexNormal = vec4(fNormal.rgb, 1.f);
 		
 		return;
 	}
-
-//	if ( bIsIlandModel )
-//	{
-//	
-//		if ( fVertWorldLocation.y < -25.0f )
-//		{	// Water
-//			pixelOutputColor.rgb = vec3(0.0f, 0.0f, 1.0f);
-//		}
-//		else if ( fVertWorldLocation.y < -15.0f )
-//		{	// Sand ( 89.8% red, 66.67% green and 43.92% )
-//			pixelOutputColor.rgb = vec3(0.898f, 0.6667f, 0.4392f);
-//		}
-//		else if ( fVertWorldLocation.y < 30.0f )
-//		{	// Grass
-//			pixelOutputColor.rgb = vec3(0.0f, 1.0f, 0.0f);
-//		}
-//		else
-//		{	// Snow
-//			pixelOutputColor.rgb = vec3(1.0f, 1.0f, 1.0f);
-//		}
-//		pixelOutputColor.a = 1.0f;
-//	
-//	
-//		return;
-//	}
-
-	vec4 finalObjectColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	
-    vec3 materialColor = fColor.rgb;
-    
-
-	float alphaTransparency = RGBA_Color.w;
-
-		// For the exhaust of the drop ship
 	if (bIsFlameObject)
 	{
 		// DON'T light. Apply the texture. Use colour as alpha
@@ -168,35 +201,89 @@ void main()
 		}
 	}
 
+	vec3 materialColor = fColor.rgb;
+	float alphaTransparency = RGBA_Color.w;
 	if(bUseRGBA_Color)
 	{
 		materialColor = RGBA_Color.rgb;
+		FBO_vertexNormal = vec4(0.f);
+
+		//return;
 	}
 	else
-	{	
+	{
 		vec3 textColour0 = texture( texture0, fUVx2.st ).rgb;		
 		vec3 textColour1 = texture( texture1, fUVx2.st ).rgb;	
 		vec3 textColour2 = texture( texture2, fUVx2.st ).rgb;	
 		vec3 textColour3 = texture( texture3, fUVx2.st ).rgb;	
-		
-		
-		materialColor =   (textColour0.rgb * texRatio_0_3.x) 
-						 + (textColour1.rgb * texRatio_0_3.y) 
-						 + (textColour2.rgb * texRatio_0_3.z) 
-						 + (textColour3.rgb * texRatio_0_3.w);
+			
+			
+		materialColor =  (textColour0.rgb * texRatio_0_3.x) 
+						+ (textColour2.rgb * texRatio_0_3.z) 
+						+ (textColour1.rgb * texRatio_0_3.y) 
+						+ (textColour3.rgb * texRatio_0_3.w);
 	}
+	pixelOutputColor = vec4(materialColor.rgb,alphaTransparency);
 
+	FBO_vertexWorldPos = vec4(fVertWorldLocation.xyz, 1.f);
+	FBO_vertexNormal = vec4(fNormal.rgb, 1.f);
+	FBO_vertexSpecular = specularColour;
 
-    if ( bDoNotLight )
-	{
-		// Set the output colour and exit early
-		// (Don't apply the lighting to this)
-		pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
-		FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
-		return;
-	}
+}
+
+vec3 GaussianBlurCalculation(int numElement)
+{
+	float screen_width = screen_width_height.x;
+	float screen_height = screen_width_height.y;
+	vec3 pixelColor = vec3(0.f);
+	float totalGaussianWeightUsed = 0.0f;
+
+//	if(numElement == 0)
+//	{
+//		//don't blur
+//		vec2 texcoord = vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height);
+//		pixelColor = texture( sampler_FBO_vertexMaterialColour,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
+//		//pixelColor = texture( samplerFBO_VertexWorldPosition,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
+//
+//	}
+//	else
+//	{
+
+		for(int i = 0; i <= numElement ; i++)
+		{
+			vec3 pixelColor_R = texture( sampler_FBO_vertexMaterialColour, vec2((gl_FragCoord.x + i)	/screen_width , (gl_FragCoord.y)/screen_height)).rgb; 
+			vec3 pixelColor_L = texture( sampler_FBO_vertexMaterialColour, vec2((gl_FragCoord.x - i)	/screen_width , (gl_FragCoord.y)/screen_height)).rgb; 
+			vec3 pixelColor_U = texture( sampler_FBO_vertexMaterialColour, vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y + i)/screen_height)).rgb; 
+			vec3 pixelColor_D = texture( sampler_FBO_vertexMaterialColour, vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y - i)/screen_height)).rgb; 
+			float blurWeight = gauss(i,numElement);
+			pixelColor_R.rgb *= blurWeight;
+			pixelColor_L.rgb *= blurWeight;
+			pixelColor_U.rgb *= blurWeight;
+			pixelColor_D.rgb *= blurWeight;
+					
+					// We used 4 weights here
+			totalGaussianWeightUsed += (blurWeight * 4);
+					
+			pixelColor.rgb += pixelColor_R.rgb + pixelColor_L.rgb + pixelColor_U.rgb + pixelColor_D.rgb;
+		}
+		pixelColor.rgb /= totalGaussianWeightUsed;
+
+//	}
+	return pixelColor;
+}
+
+float gauss(float x, float sigma) {
+    float coeff = 1.0 / (sqrt(2.0 * 3.14159) * sigma);
+    float exponent = -(x * x) / (2.0 * sigma * sigma);
+    return coeff * exp(exponent);
+}
+
+vec4 LightCalculation(vec3 vMaterialColor, vec3 vNormal, vec3 vWorldPos, vec4 vSpecular)
+{
 	// calculateLightContribute
-    vec3 normal = normalize(fNormal.xyz);
+	vec4 finalObjectColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+
+    vec3 normal = normalize(vNormal.xyz);
 	for(int i = 0; i < MAX_LIGHT_SOURCE; i++)
 	{
 		if(Light[i].turnON == 0)
@@ -210,14 +297,14 @@ void main()
 			float dotProd = dot(-Light[i].direction.xyz, normal);//normalize(normal.xyz));
 			dotProd = max( 0.0f, dotProd);
 			lightContrib *= dotProd;
-			finalObjectColor.rgb += (materialColor.rgb * Light[i].diffuse.rgb * lightContrib);
+			finalObjectColor.rgb += (vMaterialColor.rgb * Light[i].diffuse.rgb * lightContrib);
 			continue;
 		}
 		
-		vec3 vLightToVertex = Light[i].position.xyz - fVertWorldLocation.xyz;
+		vec3 vLightToVertex = Light[i].position.xyz - vWorldPos.xyz;
 		float distanceToLight = length(vLightToVertex);
 		vec3 lightVector = normalize(vLightToVertex);
-		float dotProduct = dot(lightVector, fNormal.xyz);
+		float dotProduct = dot(lightVector, vNormal.xyz);
 		dotProduct = max( 0.0f, dotProduct );
 		vec3 lightDiffuseContrib = dotProduct * Light[i].diffuse.rgb;
 		
@@ -226,9 +313,9 @@ void main()
 		//{
 			vec3 reflectVector = reflect( -lightVector, normal);//normalize(normal.xyz) );
 			
-			vec3 eyeVector = normalize(eyeLocation.xyz - fVertWorldLocation.xyz);
-			float objectSpecularPower = specularColour.w;
-			lightSpecularContrib = pow( max(0.0f, dot( eyeVector, reflectVector) ), objectSpecularPower ) * (specularColour.rgb * Light[i].specular.rgb);
+			vec3 eyeVector = normalize(eyeLocation.xyz - vWorldPos.xyz);
+			float objectSpecularPower = vSpecular.w;
+			lightSpecularContrib = pow( max(0.0f, dot( eyeVector, reflectVector) ), objectSpecularPower ) * (vSpecular.rgb * Light[i].specular.rgb);
 			
 			float atten = 1.0f /( Light[i].attenuation.x + Light[i].attenuation.y * distanceToLight +	Light[i].attenuation.z * distanceToLight*distanceToLight );  
 			
@@ -238,7 +325,7 @@ void main()
 		
 		if(Light[i].type == 1)
 		{
-			vec3 vertexToLight = normalize(fVertWorldLocation.xyz - Light[i].position.xyz);
+			vec3 vertexToLight = normalize(vWorldPos.xyz - Light[i].position.xyz);
 			
 			float currentLightRayAngle = dot( vertexToLight.xyz, Light[i].direction.xyz );
 			
@@ -263,80 +350,10 @@ void main()
 			}		
 		}
 		
-		finalObjectColor.rgb += (materialColor.rgb * lightDiffuseContrib.rgb) + (specularColour.rgb  * lightSpecularContrib.rgb );
+		finalObjectColor.rgb += (vMaterialColor.rgb * lightDiffuseContrib.rgb) + (vSpecular.rgb  * lightSpecularContrib.rgb );
 	}
 
-	vec4 pixelOutput_tmp;
-	if(bIsIlandModel)
-	{
-		// Make the objects 'refractive' (like a see through glass or water or diamond...)
-		vec3 R_eyeVector = normalize(eyeLocation.xyz - fVertWorldLocation.xyz);
-		// genType reflect(	genType IncidentVector, genType Normal);
-		// (index of refraction for diamond is 2.417 according to wikipedia)
-		// (index of refraction for water is 1.333 according to wikipedia)
-		vec3 STU_Vector = refract(R_eyeVector, fNormal.xyz, 1.0f/2.417f);
-		
-		vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
-		//pixelOutputColor.rgb *= 0.00001f;
-		//pixelOutputColor.rgb += cubeMapColour.rgb;
-		pixelOutput_tmp.rgb *=0.00001f;
-		pixelOutput_tmp.rgb += cubeMapColour.rgb;
-	}
-	pixelOutputColor = vec4(finalObjectColor.rgb, alphaTransparency);
-	//materialColor = vec3(0.5f,0.5f,0.5f);
-	vec3 ambient = 0.15 * materialColor;
-	pixelOutputColor.rgb += ambient;
-	pixelOutputColor.rgb += pixelOutput_tmp.rgb;
+	//finalObjectColor.a = 1.0f;
 
-	FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
-	FBO_vertexWorldPos *= 0.001f;
-	FBO_vertexWorldPos.rgb = vec3(1.0f, 1.0f, 1.0f);
-	
-}
-
-vec3 GaussianBlurCalculation(int numElement)
-{
-	float screen_width = screen_width_height.x;
-	float screen_height = screen_width_height.y;
-	vec3 pixelColor = vec3(0.f);
-	float totalGaussianWeightUsed = 0.0f;
-
-	if(numElement == 0)
-	{
-		//don't blur
-		vec2 texcoord = vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height);
-		pixelColor = texture( samplerFBO_COLOR_TEXTURE_01,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
-		//pixelColor = texture( samplerFBO_VertexWorldPosition,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
-
-	}
-	else
-	{
-
-		for(int i = 0; i <= numElement ; i++)
-		{
-			vec3 pixelColor_R = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x + i)	/screen_width , (gl_FragCoord.y)/screen_height)).rgb; 
-			vec3 pixelColor_L = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x - i)	/screen_width , (gl_FragCoord.y)/screen_height)).rgb; 
-			vec3 pixelColor_U = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y + i)/screen_height)).rgb; 
-			vec3 pixelColor_D = texture( samplerFBO_COLOR_TEXTURE_01, vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y - i)/screen_height)).rgb; 
-			float blurWeight = gauss(i,numElement);
-			pixelColor_R.rgb *= blurWeight;
-			pixelColor_L.rgb *= blurWeight;
-			pixelColor_U.rgb *= blurWeight;
-			pixelColor_D.rgb *= blurWeight;
-					
-					// We used 4 weights here
-			totalGaussianWeightUsed += (blurWeight * 4);
-					
-			pixelColor.rgb += pixelColor_R.rgb + pixelColor_L.rgb + pixelColor_U.rgb + pixelColor_D.rgb;
-		}
-		pixelColor.rgb /= totalGaussianWeightUsed;
-
-	}
-	return pixelColor;
-}
-
-float gauss(float x, float sigma) {
-    float coeff = 1.0 / (sqrt(2.0 * 3.14159) * sigma);
-    float exponent = -(x * x) / (2.0 * sigma * sigma);
-    return coeff * exp(exponent);
+	return finalObjectColor;
 }

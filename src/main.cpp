@@ -29,7 +29,7 @@
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
 #define TEXTURE_PATH            "asset/texture"
-#define USE_IMGUI false
+#define USE_IMGUI true
 
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
@@ -278,7 +278,7 @@ int main(void)
         //FBO
         glBindFramebuffer(GL_FRAMEBUFFER, ::g_FBO_01->ID);
         glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
-        ::g_FBO_01->clearBuffer(0);
+        ::g_FBO_01->clearBuffer(true, true);
        
         //glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 cameraDirection = glm::normalize(g_cameraEye - g_cameraTarget);
@@ -341,13 +341,23 @@ int main(void)
         //set FBO to texture
         GLuint texture21_Unit = 21;
         glActiveTexture(texture21_Unit + GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, g_FBO_01->colorTextureID);
-        pShaderManager->setShaderUniform1i("samplerFBO_COLOR_TEXTURE_01", texture21_Unit);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexMaterialColorID);
+        pShaderManager->setShaderUniform1i("sampler_FBO_vertexMaterialColour", texture21_Unit);
 
         GLuint texture22_Unit = 22;
         glActiveTexture(texture22_Unit + GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexNormalID);
+        pShaderManager->setShaderUniform1i("sampler_FBO_vertexNormal", texture22_Unit);
+
+        GLuint texture23_Unit = 23;
+        glActiveTexture(texture23_Unit + GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexWorldPositionID);
-        pShaderManager->setShaderUniform1i("samplerFBO_VertexWorldPosition", texture22_Unit);
+        pShaderManager->setShaderUniform1i("sampler_FBO_vertexWorldPos", texture23_Unit);
+
+        GLuint texture24_Unit = 24;
+        glActiveTexture(texture24_Unit + GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexSpecularID);
+        pShaderManager->setShaderUniform1i("sampler_FBO_vertexSpecular", texture24_Unit);
 
         //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
         glm::mat4 scrMAT = glm::mat4(1.f);
