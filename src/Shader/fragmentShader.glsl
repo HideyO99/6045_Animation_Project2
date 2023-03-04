@@ -109,7 +109,7 @@ void main()
 		vec4 vertexSpecular = texture( sampler_FBO_vertexSpecular, textCoords );
 		vec4 vertexRefraction = texture( sampler_FBO_vertexRefraction, textCoords );
 
-		if(vertexNormal.w == 0.f)
+		if(vertexNormal == vec4(1.f))
 		{
 			pixelOutputColor = vertexColour;
 			//return;
@@ -153,7 +153,7 @@ void main()
 
 
 		}
-
+//		pixelOutputColor = vertexNormal;
 		//
 		return;
 	}
@@ -174,7 +174,7 @@ void main()
 		pixelOutputColor.rgb = cubeMapColor.rgb;
 		pixelOutputColor.a = 1.0f;
 
-		FBO_vertexNormal = vec4(fNormal.rgb, 0.f);
+		FBO_vertexNormal = vec4(1.f);
 		
 		return;
 	}
@@ -214,10 +214,11 @@ void main()
 	float alphaTransparency = RGBA_Color.w;
 	if(bUseRGBA_Color)
 	{
-		materialColor = RGBA_Color.rgb;
-		//FBO_vertexNormal = vec4(0.f);
-
-		//return;
+		pixelOutputColor = RGBA_Color;
+		//pixelOutputColor = vec4(materialColor.rgb,alphaTransparency);
+		FBO_vertexNormal = vec4(fNormal.xyz,1.f);
+//		FBO_vertexWorldPos = vec4(fVertWorldLocation.xyz, 1.f);
+		return;
 	}
 	else
 	{
@@ -239,8 +240,8 @@ void main()
 	if ( bDoNotLight )
 	{
 		//pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
-		FBO_vertexNormal = vec4(fNormal.rgb, 0.f);
-		FBO_vertexWorldPos.w = 0.f;
+		FBO_vertexNormal = vec4(1.f);
+
 		return;
 	}
 	else
