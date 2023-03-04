@@ -12,6 +12,7 @@ out vec4 pixelOutputColor;
 out vec4 FBO_vertexNormal;	
 out vec4 FBO_vertexWorldPos;
 out vec4 FBO_vertexSpecular;
+out vec4 FBO_vertexRefraction;
 
 uniform bool bUseRGBA_Color;
 uniform bool bIsFlameObject;
@@ -25,6 +26,7 @@ uniform sampler2D sampler_FBO_vertexMaterialColour;
 uniform sampler2D sampler_FBO_vertexNormal;	
 uniform sampler2D sampler_FBO_vertexWorldPos;
 uniform sampler2D sampler_FBO_vertexSpecular;
+uniform sampler2D sampler_FBO_vertexRefraction;
 
 uniform vec2 FBO_width_height;					// x = width, y = height
 uniform vec2 screen_width_height;					// x = width, y = height
@@ -105,6 +107,7 @@ void main()
 		vec4 vertexNormal = texture( sampler_FBO_vertexNormal, textCoords );
 		vec4 vertexWorldPosition = texture( sampler_FBO_vertexWorldPos, textCoords );
 		vec4 vertexSpecular = texture( sampler_FBO_vertexSpecular, textCoords );
+		vec4 vertexRefraction = texture( sampler_FBO_vertexRefraction, textCoords );
 
 		if(vertexNormal.w == 0.f)
 		{
@@ -114,26 +117,30 @@ void main()
 		else
 		{
 			pixelOutputColor = LightCalculation(vertexColour.rgb, vertexNormal.xyz, vertexWorldPosition.xyz, vertexSpecular);
-			vec4 pixelOutput_tmp;
-			if(bIsIlandModel)
+			vec4 pixelOutput_tmp = vec4(0.f);
+//			if(vertexRefraction.w == 1.f)
 			{
-				// Make the objects 'refractive' (like a see through glass or water or diamond...)
-				vec3 R_eyeVector = normalize(eyeLocation.xyz - vertexWorldPosition.xyz);
-				// genType reflect(	genType IncidentVector, genType Normal);
-				// (index of refraction for diamond is 2.417 according to wikipedia)
-				// (index of refraction for water is 1.333 according to wikipedia)
-				vec3 STU_Vector = refract(R_eyeVector, vertexNormal.xyz, 1.0f/2.417f);
-				//vec3 STU_Vector = refract(R_eyeVector, vertexNormal.xyz, 1.0f/1.333f);
-
+//				// Make the objects 'refractive' (like a see through glass or water or diamond...)
+//				vec3 R_eyeVector = normalize(eyeLocation.xyz - vertexWorldPosition.xyz);
+//				// genType reflect(	genType IncidentVector, genType Normal);
+//				// (index of refraction for diamond is 2.417 according to wikipedia)
+//				// (index of refraction for water is 1.333 according to wikipedia)
+//				vec3 STU_Vector = refract(vertexRefraction.xyz, vertexNormal.xyz, 1.0f/2.417f);
+				vec3 STU_Vector = refract(vertexRefraction.xyz, vertexNormal.xyz, 1.0f/1.333f);
+//
 				vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
-				//pixelOutputColor.rgb *= 0.00001f;
-				//pixelOutputColor.rgb += cubeMapColour.rgb;
+//				//pixelOutputColor.rgb *= 0.00001f;
+//				//pixelOutputColor.rgb += cubeMapColour.rgb;
 				pixelOutput_tmp.rgb *=0.00001f;
 				pixelOutput_tmp.rgb += cubeMapColour.rgb;
 			}
 			pixelOutputColor.a = vertexColour.a;
-
-			vec3 ambient = 0.15 * vertexColour.rgb;
+			vec3 ambient = vertexColour.rgb;
+			if(vertexWorldPosition.w !=0)
+			{
+				ambient *=  0.15f;
+			}else{
+			}
 			pixelOutputColor.rgb += ambient;
 			pixelOutputColor.rgb += pixelOutput_tmp.rgb;
 		}
@@ -143,6 +150,8 @@ void main()
 			GaussianElementNum = clamp(GaussianElementNum, 0, MAX_KERNEL_1D_SIZE);
 			pixelOutputColor.rgb = GaussianBlurCalculation(GaussianElementNum);
 			pixelOutputColor.a = 1.f;
+
+
 		}
 
 		//
@@ -165,7 +174,7 @@ void main()
 		pixelOutputColor.rgb = cubeMapColor.rgb;
 		pixelOutputColor.a = 1.0f;
 
-		FBO_vertexNormal = vec4(fNormal.rgb, 1.f);
+		FBO_vertexNormal = vec4(fNormal.rgb, 0.f);
 		
 		return;
 	}
@@ -181,7 +190,7 @@ void main()
 		float RGBcolorSum = pixelOutputColor.r + pixelOutputColor.g + pixelOutputColor.b;
 		pixelOutputColor.a = max( ((RGBcolorSum - 0.1f) / 3.0f), 0.0f);
 	
-		FBO_vertexWorldPos.xyz = fVertWorldLocation.xyz;
+		FBO_vertexNormal = vec4(fNormal.rgb, 0.f);
 		// Exit early so bypasses lighting
 		return;
 	}
@@ -201,12 +210,12 @@ void main()
 		}
 	}
 
-	vec3 materialColor = fColor.rgb;
+	vec3 materialColor = vec3(0.f);
 	float alphaTransparency = RGBA_Color.w;
 	if(bUseRGBA_Color)
 	{
 		materialColor = RGBA_Color.rgb;
-		FBO_vertexNormal = vec4(0.f);
+		//FBO_vertexNormal = vec4(0.f);
 
 		//return;
 	}
@@ -225,10 +234,46 @@ void main()
 	}
 	pixelOutputColor = vec4(materialColor.rgb,alphaTransparency);
 
-	FBO_vertexWorldPos = vec4(fVertWorldLocation.xyz, 1.f);
-	FBO_vertexNormal = vec4(fNormal.rgb, 1.f);
-	FBO_vertexSpecular = specularColour;
 
+	FBO_vertexWorldPos = vec4(fVertWorldLocation.xyz, 1.f);
+	if ( bDoNotLight )
+	{
+		//pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
+		FBO_vertexNormal = vec4(fNormal.rgb, 0.f);
+		FBO_vertexWorldPos.w = 0.f;
+		return;
+	}
+	else
+	{
+		FBO_vertexNormal = vec4(fNormal.rgb, 1.f);
+
+	}
+	if(bIsIlandModel)
+	{
+			vec4 pixelOutput_tmp = vec4(0.f);
+
+				// Make the objects 'refractive' (like a see through glass or water or diamond...)
+				vec3 R_eyeVector = normalize(eyeLocation.xyz - fVertWorldLocation.xyz);
+				// genType reflect(	genType IncidentVector, genType Normal);
+				// (index of refraction for diamond is 2.417 according to wikipedia)
+				// (index of refraction for water is 1.333 according to wikipedia)
+				vec3 STU_Vector = refract(R_eyeVector, fNormal.xyz, 1.0f/2.417f);
+				//vec3 STU_Vector = refract(R_eyeVector, vertexNormal.xyz, 1.0f/1.333f);
+
+				vec3 cubeMapColour = texture( skyboxTexture, STU_Vector.xyz ).rgb;
+				//pixelOutputColor.rgb *= 0.00001f;
+				//pixelOutputColor.rgb += cubeMapColour.rgb;
+				pixelOutput_tmp.rgb *=0.00001f;
+				pixelOutput_tmp.rgb += cubeMapColour.rgb;
+				FBO_vertexRefraction = vec4(R_eyeVector,1.f);
+	}
+	else
+	{
+		FBO_vertexRefraction = vec4(0.f);
+	}
+
+	FBO_vertexSpecular = specularColour;
+	
 }
 
 vec3 GaussianBlurCalculation(int numElement)
@@ -309,8 +354,8 @@ vec4 LightCalculation(vec3 vMaterialColor, vec3 vNormal, vec3 vWorldPos, vec4 vS
 		vec3 lightDiffuseContrib = dotProduct * Light[i].diffuse.rgb;
 		
 		vec3 lightSpecularContrib = vec3(0.0f);
-		//if(Light[i].type == 0)
-		//{
+//		if(Light[i].type == 0)
+//		{
 			vec3 reflectVector = reflect( -lightVector, normal);//normalize(normal.xyz) );
 			
 			vec3 eyeVector = normalize(eyeLocation.xyz - vWorldPos.xyz);
@@ -321,7 +366,7 @@ vec4 LightCalculation(vec3 vMaterialColor, vec3 vNormal, vec3 vWorldPos, vec4 vS
 			
 			lightDiffuseContrib *= atten;
 			lightSpecularContrib *= atten;
-		//}
+//		}
 		
 		if(Light[i].type == 1)
 		{

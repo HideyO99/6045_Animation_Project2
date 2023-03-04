@@ -7,7 +7,9 @@ static const GLenum draw_bufer[] =
 	GL_COLOR_ATTACHMENT0,			// vertexMaterialColorID
 	GL_COLOR_ATTACHMENT1,			// vertexNormalID
 	GL_COLOR_ATTACHMENT2,			// vertexWorldPositionID
-	GL_COLOR_ATTACHMENT3			// vertexSpecularID
+	GL_COLOR_ATTACHMENT3,			// vertexSpecularID
+	GL_COLOR_ATTACHMENT4			// vertexRefractionID
+	//GL_COLOR_ATTACHMENT5			// vertexDoNotLightID
 };
 
 class cFBO
@@ -21,6 +23,8 @@ public:
 	GLuint vertexNormalID;
 	GLuint vertexWorldPositionID;
 	GLuint vertexSpecularID;
+	GLuint vertexRefractionID;
+	//GLuint vertexDoNotLightID;
 	GLuint depthTextureID;
 	GLint width;
 	GLint height;

@@ -29,7 +29,7 @@
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
 #define TEXTURE_PATH            "asset/texture"
-#define USE_IMGUI true
+#define USE_IMGUI false
 
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
@@ -358,6 +358,16 @@ int main(void)
         glActiveTexture(texture24_Unit + GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexSpecularID);
         pShaderManager->setShaderUniform1i("sampler_FBO_vertexSpecular", texture24_Unit);
+
+        GLuint texture25_Unit = 25;
+        glActiveTexture(texture25_Unit + GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexRefractionID);
+        pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture25_Unit);
+
+        //GLuint texture26_Unit = 26;
+        //glActiveTexture(texture26_Unit + GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexDoNotLightID);
+        //pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture26_Unit);
 
         //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
         glm::mat4 scrMAT = glm::mat4(1.f);

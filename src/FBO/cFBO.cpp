@@ -8,7 +8,7 @@ cFBO::cFBO()
 	vertexNormalID = 0;
 	vertexWorldPositionID = 0;
 	vertexSpecularID = 0;
-
+	vertexRefractionID = 0;
 	depthTextureID = 0;
 	width = -1;
 	height = -1;
@@ -76,6 +76,26 @@ bool cFBO::init(int width, int height, std::string& error)
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
+	//vertex refraction
+	glGenTextures(1, &(this->vertexRefractionID));
+	glBindTexture(GL_TEXTURE_2D, this->vertexRefractionID);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, black);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	////vertex DoNotLight
+	//glGenTextures(1, &(this->vertexDoNotLightID));
+	//glBindTexture(GL_TEXTURE_2D, this->vertexDoNotLightID);
+	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	//depth buffer
 	glGenTextures(1, &(this->depthTextureID));
 	glBindTexture(GL_TEXTURE_2D, this->depthTextureID);
@@ -85,9 +105,11 @@ bool cFBO::init(int width, int height, std::string& error)
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, this->vertexNormalID, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, this->vertexWorldPositionID, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, this->vertexSpecularID, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, this->vertexRefractionID, 0);
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, this->vertexDoNotLightID, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, this->depthTextureID, 0);
 
-	glDrawBuffers(4, draw_bufer);
+	glDrawBuffers(5, draw_bufer);
 
 	//check FrameBuffer status is ready
 	bool bFBOReadyStatus = false;
@@ -145,6 +167,7 @@ void cFBO::shutdown()
 	glDeleteTextures(1, &(this->vertexNormalID));
 	glDeleteTextures(1, &(this->vertexWorldPositionID));
 	glDeleteTextures(1, &(this->vertexSpecularID));
+	glDeleteTextures(1, &(this->vertexRefractionID));
 	glDeleteTextures(1, &(this->depthTextureID));
 	glDeleteFramebuffers(1, &(this->ID));
 }
@@ -164,6 +187,7 @@ void cFBO::clearBuffer(bool clearColor, bool clearDepth)
 		this->clearColorBuffer(1);
 		this->clearColorBuffer(2);
 		this->clearColorBuffer(3);
+		this->clearColorBuffer(4);
 	}
 	if (clearDepth)
 	{
