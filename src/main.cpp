@@ -73,6 +73,8 @@ void light2Setup(cVAOManager* pVAOManager);
 void light3Setup();
 void light4Setup();
 
+void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye, glm::vec3 target);
+
 int main(void)
 {
 
@@ -303,7 +305,7 @@ int main(void)
 
         //glViewport(0, 0, width, height);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        setFBOPortal(::g_FBO_02, pShaderManager, pVAOManager, eye, target);
         //FBO
         glBindFramebuffer(GL_FRAMEBUFFER, ::g_FBO_01->ID);
         glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
@@ -395,11 +397,6 @@ int main(void)
         glActiveTexture(texture25_Unit + GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexRefractionID);
         pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture25_Unit);
-
-        //GLuint texture26_Unit = 26;
-        //glActiveTexture(texture26_Unit + GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexDoNotLightID);
-        //pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture26_Unit);
 
         //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
         glm::mat4 scrMAT = glm::mat4(1.f);
@@ -619,3 +616,31 @@ void window_size_callback(GLFWwindow* window, int width, int height)
     }
 }
 
+void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye, glm::vec3 target)
+{
+    glm::mat4x4 matProjection;
+    glm::mat4x4 matView;
+
+    GLuint shaderID = pShaderManager->getIDfromName("Shader01");
+
+    //FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo->ID);
+    glViewport(0, 0, fbo->width, fbo->height);
+    fbo->clearBuffer(true, true);
+
+    std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
+
+    matView = glm::lookAt(::g_cameraEye, ::g_cameraTarget, ::g_upVector);
+    
+    GLint eyeLocation_UniLoc = glGetUniformLocation(shaderID, "eyeLocation");
+
+    glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
+
+    float FBO_screenRatio = static_cast<float>(fbo->width) / fbo->height;
+    matProjection = glm::perspective(glm::radians(fov), FBO_screenRatio, 0.1f, 10000.f);
+
+    pShaderManager->setShaderUniformM4fv("mView", matView);
+    pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
+
+    updateInstanceObj(pShaderManager, pVAOManager);
+}

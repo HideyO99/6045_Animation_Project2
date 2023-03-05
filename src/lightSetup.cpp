@@ -151,3 +151,7 @@ void light4Setup()
     ::g_pTheLightManager->plight[9]->angle.y = 20.0f;     // Degrees
     ::g_pTheLightManager->plight[9]->turnON = 1;
 }
+
+
+
+
