@@ -529,11 +529,14 @@
 	</model>
 	<model name="projecter">asset/model/Quad_2_sided_aligned_on_XY_plane.ply
 		<modelInstance>projecter1<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>projecter2<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>projecter3<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>projecter4<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 	
 </PLYMODEL>
 <EYE_LOCATION>
-	<x>-18</x>
-	<y>115</y>
-	<z>145</z>
+	<x>0</x>
+	<y>15</y>
+	<z>40</z>
 </EYE_LOCATION>

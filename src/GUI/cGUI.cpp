@@ -66,6 +66,16 @@ bool cGUI::ImGUI_render()
             {
                 cMeshObj* pCurrentMeshObject = pVecInstanceMeshObj->at(i);
                 //ImGui::Text(pCurrentMeshObject->instanceName.c_str());
+                if (pCurrentMeshObject->meshName == "floorA" ||
+                    pCurrentMeshObject->meshName == "floorB" ||
+                    pCurrentMeshObject->meshName == "floorC" ||
+                    pCurrentMeshObject->meshName == "wall" ||
+                    pCurrentMeshObject->meshName == "door" ||
+                    pCurrentMeshObject->meshName == "skybox" ||
+                    pCurrentMeshObject->meshName == "terrain")
+                {
+                    continue;
+                }
                 if (ImGui::TreeNode((void*)(intptr_t)i, pCurrentMeshObject->instanceName.c_str()))
                 {
                     ImGui::BeginGroup();

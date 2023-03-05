@@ -554,23 +554,23 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->position.x = -27.5f;
 			itCurrentMesh->second->position.y = 1.f;
 			itCurrentMesh->second->position.z = 0.f;
-			itCurrentMesh->second->rotation.y = 3.141f;
+			itCurrentMesh->second->rotation.y = 0.f;
 			itCurrentMesh->second->rotation.z = 0.0f;
 			itCurrentMesh->second->isWireframe = false;
 			itCurrentMesh->second->color_RGBA = glm::vec4(1, 1, 0, 1);
 			itCurrentMesh->second->bUse_RGBA_colour = true;
 		}
 
-		if ((itCurrentMesh->second->meshName == "projecter"))
-		{
-			itCurrentMesh->second->bUse_RGBA_colour = false;
-			itCurrentMesh->second->textures[0] = textureFile;
-			itCurrentMesh->second->textureRatios[0] = 1;
-			itCurrentMesh->second->scale = 0.03;
-			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x;//* 5;
-			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z;//* 5;
-			itCurrentMesh->second->isVisible = true;
-		}
+		//if ((itCurrentMesh->second->meshName == "projecter"))
+		//{
+		//	itCurrentMesh->second->bUse_RGBA_colour = false;
+		//	itCurrentMesh->second->textures[0] = textureFile;
+		//	itCurrentMesh->second->textureRatios[0] = 1;
+		//	itCurrentMesh->second->scale = 0.03;
+		//	itCurrentMesh->second->position.x = itCurrentMesh->second->position.x;//* 5;
+		//	itCurrentMesh->second->position.z = itCurrentMesh->second->position.z;//* 5;
+		//	itCurrentMesh->second->isVisible = true;
+		//}
 	}
 	//cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
 	//pCurrentMeshObject->bUse_RGBA_colour = false;

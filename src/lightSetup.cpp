@@ -10,7 +10,7 @@ void light0Setup() //lamp
     *pDirLight->pDirection = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
     *pDirLight->pDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     *pDirLight->pSpecular = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
-    *pDirLight->pTurnON = 1;
+    *pDirLight->pTurnON = 0;
 
 
     //::g_pTheLightManager->plight[3]->position = glm::vec4(1.95f, 2.7f, -0.75f, 1.f);

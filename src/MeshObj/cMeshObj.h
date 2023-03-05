@@ -4,7 +4,7 @@
 #include <vector>
 //#include <glm/vec3.hpp>
 
-#define MOVINGTEXTURE false
+#define MOVINGTEXTURE true
 
 class cMeshObj
 {

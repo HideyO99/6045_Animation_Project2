@@ -29,7 +29,7 @@
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
 #define TEXTURE_PATH            "asset/texture"
-#define USE_IMGUI false
+#define USE_IMGUI true
 
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
@@ -51,6 +51,9 @@ cTextureManager* g_pTextureManager = NULL;
 
 cFBO* g_FBO_01 = NULL;
 cFBO* g_FBO_02 = NULL;
+cFBO* g_FBO_03 = NULL;
+cFBO* g_FBO_04 = NULL;
+cMeshObj* g_MeshBoss = NULL;
 
 static void error_callback(int error, const char* description)
 {
@@ -129,12 +132,16 @@ int main(void)
 
     ::g_FBO_01 = new cFBO();
     ::g_FBO_02 = new cFBO();
+    ::g_FBO_03 = new cFBO();
+    ::g_FBO_04 = new cFBO();
     int screenW = 0;
     int screenH = 0;
     glfwGetFramebufferSize(window, &screenW, &screenH);
     std::string error;
-    result = ::g_FBO_01->init(screenW, screenH, error);
-    result = ::g_FBO_02->init(screenW, screenH, error);
+    result = ::g_FBO_01->init(screenW, screenH, error); // for full screen quad
+    result = ::g_FBO_02->init(screenW, screenH, error); // scene 1
+    result = ::g_FBO_03->init(screenW, screenH, error); // scene 1
+    result = ::g_FBO_04->init(screenW, screenH, error); // scene 3
     if (!result)
     {
         std::cout << "error: FBO initialization = " << error << std::endl;
@@ -249,8 +256,30 @@ int main(void)
    result = pVAOManager->setTexture("boss", "Beholder_Base_color.bmp", 0);
 
     result = pVAOManager->setSkyBoxFlag("skybox",true);
-    result = pVAOManager->setInstanceObjVisible("projecter", false); 
+    //full screen quad
+    result = pVAOManager->setInstanceObjVisible("projecter1", false); 
+    result = pVAOManager->setInstanceObjScale("projecter1", 0.03f);
+    result = pVAOManager->setUseRGBColorFlag("projecter1", false);
+    result = pVAOManager->setInstanceObjPosition("projecter1", glm::vec4(0.f));
 
+    result = pVAOManager->setInstanceObjVisible("projecter2", true);
+    result = pVAOManager->setInstanceObjScale("projecter2", 5.f);
+    result = pVAOManager->setUseRGBColorFlag("projecter2", false);
+    result = pVAOManager->setInstanceObjPosition("projecter2", glm::vec4(-12.5f,2.5f,-15.f,1.f));
+
+    result = pVAOManager->setInstanceObjVisible("projecter3", true);
+    result = pVAOManager->setInstanceObjScale("projecter3", 5.f);
+    result = pVAOManager->setUseRGBColorFlag("projecter3", false);
+    result = pVAOManager->setInstanceObjPosition("projecter3", glm::vec4(-2.5f, 2.5f, -15.f, 1.f));
+
+    result = pVAOManager->setInstanceObjVisible("projecter4", true);
+    result = pVAOManager->setInstanceObjScale("projecter4", 5.f);
+    result = pVAOManager->setUseRGBColorFlag("projecter4", false);
+    result = pVAOManager->setInstanceObjPosition("projecter4", glm::vec4(7.5f, 2.5f, -15.f, 1.f));
+
+    result = pVAOManager->setInstanceObjPosition("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
+    //result = pVAOManager->set("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
+    g_MeshBoss = pVAOManager->findMeshObjAddr("boss");
     light0Setup(); // Dir light
     light1Setup(pVAOManager);// torch
     light2Setup(pVAOManager); //beholder eye
@@ -282,6 +311,7 @@ int main(void)
        
         //glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 cameraDirection = glm::normalize(g_cameraEye - g_cameraTarget);
+        std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
         glm::vec3 cameraRight = glm::normalize(glm::cross(g_upVector, cameraDirection));
         if (!bIsWalkAround)
         {
@@ -313,9 +343,11 @@ int main(void)
 
         glm::vec3 oldEye = ::g_cameraEye;
         glm::vec3 oldAt = ::g_cameraTarget;
+        glm::vec3 oldCamFront = ::g_cameraFront;
 
         ::g_cameraEye = glm::vec3(0.0f, 0.0f, -6.0f);
         ::g_cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        ::g_cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 
         glfwGetFramebufferSize(window, &width, &height);
         ratio = width / (float)height;
@@ -382,6 +414,7 @@ int main(void)
 #endif
         ::g_cameraEye = oldEye;
         ::g_cameraTarget = oldAt;
+        ::g_cameraFront = oldCamFront;
 
         pShaderManager->setShaderUniform1f("bFullScreen", false);
 
@@ -482,22 +515,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_A)
     {
         //::g_cameraEye.x -= CAMERA_MOVE_SPEED;
-        ::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+        //::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+        g_MeshBoss->position.x -= 0.1;
     }
     if (key == GLFW_KEY_D)
     {
         //::g_cameraEye.x += CAMERA_MOVE_SPEED;
-        ::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+        //::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+        g_MeshBoss->position.x += 0.1;
     }
     if (key == GLFW_KEY_W)
     {
         //::g_cameraEye.z -= CAMERA_MOVE_SPEED;
-        ::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+        //::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+        g_MeshBoss->position.z -= 0.1;
     }
     if (key == GLFW_KEY_S)
     {
         //::g_cameraEye.z += CAMERA_MOVE_SPEED;
-        ::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+        //::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+        g_MeshBoss->position.z += 0.1;
     }
     if (key == GLFW_KEY_Q)
     {
