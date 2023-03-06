@@ -29,7 +29,7 @@
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
 #define TEXTURE_PATH            "asset/texture"
-#define USE_IMGUI true
+#define USE_IMGUI false
 
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
@@ -43,6 +43,8 @@ float pitch = 0.0f;
 float lastX = 1280.0f / 2.0;
 float lastY = 800.0 / 2.0;
 float fov = 45.0f;
+
+bool toggleblur = false;
 
 cLightManager* g_pTheLightManager = NULL;
 static GLFWwindow* window = nullptr;
@@ -62,6 +64,7 @@ static void error_callback(int error, const char* description)
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 static void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void window_size_callback(GLFWwindow* window, int width, int height);
 
@@ -74,6 +77,7 @@ void light3Setup();
 void light4Setup();
 
 void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye, glm::vec3 target);
+void setFBOtoTexture(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector);
 
 int main(void)
 {
@@ -117,6 +121,7 @@ int main(void)
 
     glfwMakeContextCurrent(window);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
@@ -141,8 +146,8 @@ int main(void)
     glfwGetFramebufferSize(window, &screenW, &screenH);
     std::string error;
     result = ::g_FBO_01->init(screenW, screenH, error); // for full screen quad
-    result = ::g_FBO_02->init(screenW, screenH, error); // scene 1
-    result = ::g_FBO_03->init(screenW, screenH, error); // scene 1
+    result = ::g_FBO_02->init(500, 500, error); // scene 1
+    result = ::g_FBO_03->init(500, 500, error); // scene 2
     result = ::g_FBO_04->init(screenW, screenH, error); // scene 3
     if (!result)
     {
@@ -264,7 +269,7 @@ int main(void)
     result = pVAOManager->setUseRGBColorFlag("projecter1", false);
     result = pVAOManager->setInstanceObjPosition("projecter1", glm::vec4(0.f));
 
-    result = pVAOManager->setInstanceObjVisible("projecter2", true);
+    result = pVAOManager->setInstanceObjVisible("projecter2", false);
     result = pVAOManager->setInstanceObjScale("projecter2", 5.f);
     result = pVAOManager->setUseRGBColorFlag("projecter2", false);
     result = pVAOManager->setInstanceObjPosition("projecter2", glm::vec4(-12.5f,2.5f,-15.f,1.f));
@@ -305,15 +310,20 @@ int main(void)
 
         //glViewport(0, 0, width, height);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        setFBOPortal(::g_FBO_02, pShaderManager, pVAOManager, eye, target);
-        //FBO
+        setFBOPortal(::g_FBO_02, pShaderManager, pVAOManager, glm::vec4(-18,115,145,1.f), glm::vec4(200.f, 200.f, -100.f, 0.f));
+        setFBOPortal(::g_FBO_03, pShaderManager, pVAOManager, glm::vec4(-2.5f, 2.5f, -15.f, 1.f), glm::vec4(-2.5f,2.5f,0.f,1.f));
+        //g_cameraEye = glm::vec4(0.f);
+        //g_cameraTarget = glm::vec4(200.f, 200.f, -100.f, 0.f);
+        //////////////////////////////////////////////////////////////
+        //FBO                                                       //
+        //////////////////////////////////////////////////////////////
         glBindFramebuffer(GL_FRAMEBUFFER, ::g_FBO_01->ID);
         glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
         ::g_FBO_01->clearBuffer(true, true);
        
         //glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 cameraDirection = glm::normalize(g_cameraEye - g_cameraTarget);
-        std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
+        
         glm::vec3 cameraRight = glm::normalize(glm::cross(g_upVector, cameraDirection));
         if (!bIsWalkAround)
         {
@@ -339,7 +349,13 @@ int main(void)
         pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
        
         updateInstanceObj(pShaderManager, pVAOManager);
+        setFBOtoTexture(g_FBO_02, pShaderManager, pVAOManager, "projecter2");
+        setFBOtoTexture(g_FBO_03, pShaderManager, pVAOManager, "projecter3");
+        //setFBOtoTexture(g_FBO_04, pShaderManager, pVAOManager, "projecter4");
 
+        //////////////////////////////////////////////////////////////
+        //main buffer                                               //
+        //////////////////////////////////////////////////////////////
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -355,18 +371,18 @@ int main(void)
         ratio = width / (float)height;
         pShaderManager->setShaderUniform2f("FBO_width_height", g_FBO_01->width, g_FBO_01->height);
         pShaderManager->setShaderUniform2f("screen_width_height", (float)width, (float)height);
-        matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 100.f);
+        matProjection = glm::perspective(glm::radians(fov), ratio, 0.1f, 10000.f);
         glViewport(0, 0, width, height);
 
-        if (!bIsWalkAround)
+        //if (!bIsWalkAround)
         {
 
             matView = glm::lookAt(::g_cameraEye, ::g_cameraTarget, ::g_upVector);
         }
-        else
-        {
-            matView = glm::lookAt(::g_cameraEye, ::g_cameraEye + ::g_cameraFront, ::g_upVector);
-        }
+        //else
+        //{
+        //    matView = glm::lookAt(::g_cameraEye, ::g_cameraEye + ::g_cameraFront, ::g_upVector);
+        //}
 
         glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
         pShaderManager->setShaderUniformM4fv("mView", matView);
@@ -398,14 +414,21 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexRefractionID);
         pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture25_Unit);
 
-        //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
+        if(toggleblur)
+        { 
+            pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
+        }
+        else
+        {
+            pShaderManager->setShaderUniform1f("blurAmount", 0.f);
+        }
         glm::mat4 scrMAT = glm::mat4(1.f);
         cMeshObj* scrOBJ = pVAOManager->findMeshObjAddr("projecter1");
         result = pVAOManager->setInstanceObjScale("projecter1", 100.f);
         result = pVAOManager->setInstanceObjVisible("projecter1", true);
         drawObj(scrOBJ, scrMAT, pShaderManager, pVAOManager);
         result = pVAOManager->setInstanceObjVisible("projecter1", false);
-        //updateInstanceObj(pShaderManager, pVAOManager);
+       //updateInstanceObj(pShaderManager, pVAOManager);
 #if USE_IMGUI
         gui_->ImGUICreateFrame();
 #endif
@@ -533,6 +556,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         //::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
         g_MeshBoss->position.z += 0.1;
     }
+    if (key == GLFW_KEY_LEFT)
+    {
+        ::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+    }
+    if (key == GLFW_KEY_RIGHT)
+    {
+        ::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+    }
+    if (key == GLFW_KEY_UP)
+    {
+        ::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+    }
+    if (key == GLFW_KEY_DOWN)
+    {
+        ::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+    }
     if (key == GLFW_KEY_Q)
     {
         ::g_cameraEye.y -= CAMERA_MOVE_SPEED;
@@ -540,6 +579,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_E)
     {
         ::g_cameraEye.y += CAMERA_MOVE_SPEED;
+    }
+    if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
+    {
+        toggleblur = !toggleblur;
     }
     if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
     {
@@ -596,6 +639,19 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     }
 }
 
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    {
+        std::cout << "R click" << std::endl;
+    }
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        std::cout << "L click" << std::endl;
+    }
+
+}
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     fov -= (float)yoffset;
@@ -628,19 +684,65 @@ void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOMa
     glViewport(0, 0, fbo->width, fbo->height);
     fbo->clearBuffer(true, true);
 
-    std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
-
-    matView = glm::lookAt(::g_cameraEye, ::g_cameraTarget, ::g_upVector);
-    
+    //std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
+    if (!bIsWalkAround)
+    {
+        matView = glm::lookAt(eye, target, ::g_upVector);
+    }
+    else
+    {
+        matView = glm::lookAt(eye, eye + target, ::g_upVector);
+    }
     GLint eyeLocation_UniLoc = glGetUniformLocation(shaderID, "eyeLocation");
 
-    glUniform4f(eyeLocation_UniLoc, ::g_cameraEye.x, ::g_cameraEye.y, ::g_cameraEye.z, 1.0f);
+    glUniform4f(eyeLocation_UniLoc, eye.x, eye.y, eye.z, 1.0f);
 
     float FBO_screenRatio = static_cast<float>(fbo->width) / fbo->height;
-    matProjection = glm::perspective(glm::radians(fov), FBO_screenRatio, 0.1f, 10000.f);
+    matProjection = glm::perspective(0.3f, FBO_screenRatio, 0.1f, 10000.f);
 
     pShaderManager->setShaderUniformM4fv("mView", matView);
     pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
 
     updateInstanceObj(pShaderManager, pVAOManager);
+}
+
+void setFBOtoTexture(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector)
+{
+    pShaderManager->setShaderUniform1f("bFullScreen", true);
+    //set FBO to texture
+    GLuint texture21_Unit = 31;
+    glActiveTexture(texture21_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo->vertexMaterialColorID);
+    pShaderManager->setShaderUniform1i("sampler_FBO_vertexMaterialColour", texture21_Unit);
+
+    GLuint texture22_Unit = 32;
+    glActiveTexture(texture22_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo->vertexNormalID);
+    pShaderManager->setShaderUniform1i("sampler_FBO_vertexNormal", texture22_Unit);
+
+    GLuint texture23_Unit = 33;
+    glActiveTexture(texture23_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo->vertexWorldPositionID);
+    pShaderManager->setShaderUniform1i("sampler_FBO_vertexWorldPos", texture23_Unit);
+
+    GLuint texture24_Unit = 34;
+    glActiveTexture(texture24_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo->vertexSpecularID);
+    pShaderManager->setShaderUniform1i("sampler_FBO_vertexSpecular", texture24_Unit);
+
+    GLuint texture25_Unit = 35;
+    glActiveTexture(texture25_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo->vertexRefractionID);
+    pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture25_Unit);
+
+    //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
+    glm::mat4 scrMAT = glm::mat4(1.f);
+    cMeshObj* scrOBJ = pVAOManager->findMeshObjAddr(projector);
+    //bool result = pVAOManager->setInstanceObjScale("projecter1", 100.f);
+    bool result = pVAOManager->setInstanceObjVisible(projector, true);
+    pShaderManager->setShaderUniform1f("bMirror", true);
+    drawObj(scrOBJ, scrMAT, pShaderManager, pVAOManager);
+    result = pVAOManager->setInstanceObjVisible(projector, false);
+    pShaderManager->setShaderUniform1f("bMirror", false);
+    pShaderManager->setShaderUniform1f("bFullScreen", false);
 }
