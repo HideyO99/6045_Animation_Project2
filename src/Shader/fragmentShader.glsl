@@ -105,7 +105,7 @@ void main()
 		vec2 textCoords;
 		if(bMirror)
 		{
-			textCoords = vec2( -gl_FragCoord.x / 500, gl_FragCoord.y  / 500 );
+			textCoords = vec2( gl_FragCoord.x / screen_width, gl_FragCoord.y  / screen_height );
 		}
 		else
 		{
@@ -367,48 +367,47 @@ vec3 GaussianBlurCalculation(int numElement)
 	float screen_height = screen_width_height.y;
 	vec3 pixelColor = vec3(0.f);
 	float totalGaussianWeightUsed = 0.0f;
-
-	if(abs(gl_FragCoord.x) < 100)
+	float recticle = pow((gl_FragCoord.x -(screen_width/2)),2) + pow((gl_FragCoord.y-(screen_height/2)),2); 
+	float radius = pow((screen_height/4),2);
+	float thick = pow((screen_height/4)+10,2);
+	if((recticle < thick)&& (recticle>radius))
+	{
+		return vec3(0.f);
+	}
+	else if(recticle < radius)
 	{
 		//don't blur
 		vec2 texcoord = vec2((gl_FragCoord.x ) , (gl_FragCoord.y));
-//		//pixelColor = texture( sampler_FBO_vertexMaterialColour,vec2((gl_FragCoord.x )/screen_width , (gl_FragCoord.y)/screen_height)).rgb;
 		pixelColor = LightCalculation(texcoord).rgb;
 		
-//		vec2 textCoords = vec2( gl_FragCoord.x / screen_width, gl_FragCoord.y  / screen_height );
-//		vec4 vertexColour = texture( sampler_FBO_vertexMaterialColour, textCoords );
-//		vec4 vertexNormal = texture( sampler_FBO_vertexNormal, textCoords );
-//		vec4 vertexWorldPosition = texture( sampler_FBO_vertexWorldPos, textCoords );
-//		vec4 vertexSpecular = texture( sampler_FBO_vertexSpecular, textCoords );
-//		vec4 vertexRefraction = texture( sampler_FBO_vertexRefraction, textCoords );
-//		pixelColor = LightContribute(vertexColour.rgb, vertexNormal.xyz, vertexWorldPosition.xyz, vertexSpecular, vertexRefraction).rgb;
 		return pixelColor;
 	}
-	for(int i = 0; i <= numElement ; i++)
+	else
 	{
-		//cal Light
-		
-		vec4 calPixel_R = LightCalculation(vec2( gl_FragCoord.x + i, gl_FragCoord.y));
-		vec4 calPixel_L = LightCalculation(vec2( gl_FragCoord.x - i, gl_FragCoord.y));
-		vec4 calPixel_U = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y + 1));
-		vec4 calPixel_D = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y - 1));
+		for(int i = 0; i <= numElement ; i++)
+		{
+			//cal Light
+			
+			vec4 calPixel_R = LightCalculation(vec2( gl_FragCoord.x + i, gl_FragCoord.y));
+			vec4 calPixel_L = LightCalculation(vec2( gl_FragCoord.x - i, gl_FragCoord.y));
+			vec4 calPixel_U = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y + 1));
+			vec4 calPixel_D = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y - 1));
 
-		float blurWeight = gauss(i,numElement);
-		calPixel_R.rgb *= blurWeight;
-		calPixel_L.rgb *= blurWeight;
-		calPixel_U.rgb *= blurWeight;
-		calPixel_D.rgb *= blurWeight;
-				
-				// We used 4 weights here
-		totalGaussianWeightUsed += (blurWeight * 4);
-				
-		pixelColor.rgb += calPixel_R.rgb + calPixel_L.rgb + calPixel_U.rgb + calPixel_D.rgb;
+			float blurWeight = gauss(i,numElement);
+			calPixel_R.rgb *= blurWeight;
+			calPixel_L.rgb *= blurWeight;
+			calPixel_U.rgb *= blurWeight;
+			calPixel_D.rgb *= blurWeight;
+					
+					// We used 4 weights here
+			totalGaussianWeightUsed += (blurWeight * 4);
+					
+			pixelColor.rgb += calPixel_R.rgb + calPixel_L.rgb + calPixel_U.rgb + calPixel_D.rgb;
+		}
+		pixelColor.rgb /= totalGaussianWeightUsed;
+
+		return pixelColor;
 	}
-	pixelColor.rgb /= totalGaussianWeightUsed;
-
-//	}
-
-	return pixelColor;
 }
 
 vec4 LightCalculation(vec2 FragCoord)

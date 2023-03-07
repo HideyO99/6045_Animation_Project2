@@ -490,6 +490,7 @@
 	
 	<model name="moon">asset/model/UV_Sphere_Cylindrical_UIV_Projection_.ply
 		<modelInstance>moon<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+		<modelInstance>orb<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 	
 	<model name="torch">asset/model/SM_Prop_Dwarf_Torch_01.ply

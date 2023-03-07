@@ -146,8 +146,8 @@ int main(void)
     glfwGetFramebufferSize(window, &screenW, &screenH);
     std::string error;
     result = ::g_FBO_01->init(screenW, screenH, error); // for full screen quad
-    result = ::g_FBO_02->init(500, 500, error); // scene 1
-    result = ::g_FBO_03->init(500, 500, error); // scene 2
+    result = ::g_FBO_02->init(screenW, screenH, error); // scene 1
+    result = ::g_FBO_03->init(screenW, screenH, error); // scene 2
     result = ::g_FBO_04->init(screenW, screenH, error); // scene 3
     if (!result)
     {
@@ -283,6 +283,11 @@ int main(void)
     result = pVAOManager->setInstanceObjScale("projecter4", 5.f);
     result = pVAOManager->setUseRGBColorFlag("projecter4", false);
     result = pVAOManager->setInstanceObjPosition("projecter4", glm::vec4(7.5f, 2.5f, -15.f, 1.f));
+
+    result = pVAOManager->setInstanceObjPosition("orb", glm::vec4(-12.f, 2.5f, 0.f, 1.f));
+    result = pVAOManager->setInstanceObjScale("orb", 2.5);
+    result = pVAOManager->setInstanceObjRGB("orb", glm::vec4(1.f, 1.f, 1.f, 0.3f));
+    result = pVAOManager->setIslandModelFlag("orb", true);
 
     result = pVAOManager->setInstanceObjPosition("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
     //result = pVAOManager->set("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
