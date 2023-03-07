@@ -323,6 +323,7 @@ int main(void)
         //FBO                                                       //
         //////////////////////////////////////////////////////////////
         glBindFramebuffer(GL_FRAMEBUFFER, ::g_FBO_01->ID);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
         ::g_FBO_01->clearBuffer(true, true);
        
@@ -368,7 +369,7 @@ int main(void)
         glm::vec3 oldAt = ::g_cameraTarget;
         glm::vec3 oldCamFront = ::g_cameraFront;
 
-        ::g_cameraEye = glm::vec3(0.0f, 0.0f, -6.0f);
+        ::g_cameraEye = glm::vec3(0.0f, 0.0f, 6.0f);
         ::g_cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         ::g_cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 
@@ -688,7 +689,7 @@ void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOMa
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->ID);
     glViewport(0, 0, fbo->width, fbo->height);
     fbo->clearBuffer(true, true);
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
     if (!bIsWalkAround)
     {
@@ -703,7 +704,7 @@ void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOMa
     glUniform4f(eyeLocation_UniLoc, eye.x, eye.y, eye.z, 1.0f);
 
     float FBO_screenRatio = static_cast<float>(fbo->width) / fbo->height;
-    matProjection = glm::perspective(0.3f, FBO_screenRatio, 0.1f, 10000.f);
+    matProjection = glm::perspective(glm::radians(90.f), FBO_screenRatio, 0.1f, 10000.f);
 
     pShaderManager->setShaderUniformM4fv("mView", matView);
     pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
