@@ -105,7 +105,7 @@ void main()
 		vec2 textCoords;
 		if(bMirror)
 		{
-			textCoords = vec2( gl_FragCoord.x / screen_width, gl_FragCoord.y  / screen_height );
+			textCoords = vec2( -gl_FragCoord.x / screen_width, gl_FragCoord.y  / screen_height );
 		}
 		else
 		{
@@ -378,6 +378,11 @@ vec3 GaussianBlurCalculation(int numElement)
 	{
 		//don't blur
 		vec2 texcoord = vec2((gl_FragCoord.x ) , (gl_FragCoord.y));
+		if(bMirror)
+		{
+			texcoord = vec2((-gl_FragCoord.x ) , (gl_FragCoord.y));
+		}
+
 		pixelColor = LightCalculation(texcoord).rgb;
 		
 		return pixelColor;
@@ -388,11 +393,25 @@ vec3 GaussianBlurCalculation(int numElement)
 		{
 			//cal Light
 			
-			vec4 calPixel_R = LightCalculation(vec2( gl_FragCoord.x + i, gl_FragCoord.y));
-			vec4 calPixel_L = LightCalculation(vec2( gl_FragCoord.x - i, gl_FragCoord.y));
-			vec4 calPixel_U = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y + 1));
-			vec4 calPixel_D = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y - 1));
+			vec4 calPixel_R;
+			vec4 calPixel_L;
+			vec4 calPixel_U;
+			vec4 calPixel_D;
 
+			if(bMirror)
+			{
+				calPixel_R = LightCalculation(vec2( -gl_FragCoord.x + i, gl_FragCoord.y));
+				calPixel_L = LightCalculation(vec2( -gl_FragCoord.x - i, gl_FragCoord.y));
+				calPixel_U = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y + 1));
+				calPixel_D = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y - 1));
+			}
+			else
+			{
+				calPixel_R = LightCalculation(vec2( gl_FragCoord.x + i, gl_FragCoord.y));
+				calPixel_L = LightCalculation(vec2( gl_FragCoord.x - i, gl_FragCoord.y));
+				calPixel_U = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y + 1));
+				calPixel_D = LightCalculation(vec2( gl_FragCoord.x	, gl_FragCoord.y - 1));
+			}
 			float blurWeight = gauss(i,numElement);
 			calPixel_R.rgb *= blurWeight;
 			calPixel_L.rgb *= blurWeight;
