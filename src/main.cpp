@@ -33,7 +33,8 @@
 
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
-glm::vec3 g_cameraTarget = glm::vec3(-2.5f, 2.5f, -15.0f);
+glm::vec3 g_cameraTarget_defualt = glm::vec3(-2.5f, 2.5f, -15.0f);
+glm::vec3 g_cameraTarget = g_cameraTarget_defualt;
 glm::vec3 g_upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 g_cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 bool bIsWalkAround = false;
@@ -346,12 +347,13 @@ int main(void)
         glm::vec3 cameraRight = glm::normalize(glm::cross(g_upVector, cameraDirection));
         if (!bIsWalkAround)
         {
-
+            g_cameraTarget = g_cameraTarget_defualt;
             matView = glm::lookAt(::g_cameraEye, g_cameraTarget, ::g_upVector);
         }
         else
         {
-            matView = glm::lookAt(::g_cameraEye, ::g_cameraEye+::g_cameraFront, ::g_upVector);
+            g_cameraTarget = glm::length(g_cameraTarget - g_cameraEye) * g_cameraFront;
+            matView = glm::lookAt(::g_cameraEye, g_cameraTarget, ::g_upVector);
         }
         GLint eyeLocation_UniLoc = glGetUniformLocation(shaderID, "eyeLocation");
 
@@ -712,10 +714,12 @@ void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOMa
     fbo->clearBuffer(true, true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
-    //if (!bIsWalkAround)
-    //{
+
         //glm::vec3 eyeTemp = glm::normalize(glm::cross(g_upVector, (glm::normalize(g_cameraEye-eye) )));
-        matView = glm::lookAt(eye, target, ::g_upVector);
+    glm::vec3 mirrorNorm = glm::normalize(target - eye);
+    glm::vec3 eyeTemp = g_cameraEye - 2.f * glm::dot(g_cameraEye - eye, mirrorNorm) * mirrorNorm;
+    glm::vec3 targetTemp = g_cameraTarget - 2.f * glm::dot(g_cameraTarget - eye, mirrorNorm) * mirrorNorm;
+    matView = glm::lookAt(eyeTemp, targetTemp, ::g_upVector);
     //}
     //else
     //{
