@@ -535,9 +535,13 @@
 		<modelInstance>projecter4<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
 	</model>
 	
+	<model name="barrel">asset/model/SM_Prop_Barrel_02.ply
+		<modelInstance>barrel1<posX>0</posX><posZ>0</posZ><rotateY>0</rotateY></modelInstance>
+	</model>
+	
 </PLYMODEL>
 <EYE_LOCATION>
-	<x>0</x>
-	<y>15</y>
-	<z>40</z>
+	<x>-3.5</x>
+	<y>5</y>
+	<z>11</z>
 </EYE_LOCATION>

@@ -12,6 +12,7 @@ cFBO::cFBO()
 	depthTextureID = 0;
 	width = -1;
 	height = -1;
+	
 }
 
 cFBO::~cFBO()
@@ -37,7 +38,7 @@ bool cFBO::init(int width, int height, std::string& error)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR,black);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 	//vertex normal buffer(texture)
@@ -45,7 +46,7 @@ bool cFBO::init(int width, int height, std::string& error)
 	glBindTexture(GL_TEXTURE_2D, this->vertexNormalID);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, this->width, this->height);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, black);
@@ -57,7 +58,7 @@ bool cFBO::init(int width, int height, std::string& error)
 	glBindTexture(GL_TEXTURE_2D, this->vertexWorldPositionID);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, black);
@@ -69,7 +70,7 @@ bool cFBO::init(int width, int height, std::string& error)
 	glBindTexture(GL_TEXTURE_2D, this->vertexSpecularID);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, black);
@@ -81,20 +82,43 @@ bool cFBO::init(int width, int height, std::string& error)
 	glBindTexture(GL_TEXTURE_2D, this->vertexRefractionID);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, black);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-	////vertex DoNotLight
-	//glGenTextures(1, &(this->vertexDoNotLightID));
-	//glBindTexture(GL_TEXTURE_2D, this->vertexDoNotLightID);
-	//glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, this->width, this->height);
+	//vertex CubeMap
+	glGenTextures(1, &(this->vertexCubeMapID));
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->vertexCubeMapID);
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(targets[i], 0, GL_RGB, 2048, 2048,0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	}
+	//glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, GL_RGBA32F, 2048, 2048);
+	//result = glGetError();
+	//for (int i = 0; i < 6; i++)
+	//{
+	//	glTexSubImage2D(targets[i], 0, 0, 0, 2048, 2048, GL_RGBA, GL_UNSIGNED_BYTE, &(this->img));
+	//	result = glGetError();
+	//}
+	//glTexStorage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA32F, 2048, 2048);
+	//result = glGetError();
+	//glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA32F, 2048, 2048);
+	//result = glGetError();
+	//glTexStorage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA32F, 2048, 2048);
+	//result = glGetError();
+	//glTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA32F, 2048, 2048);
+	//result = glGetError();
+	//glTexStorage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA32F, 2048, 2048);
+	//result = glGetError();
 
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//depth buffer
 	glGenTextures(1, &(this->depthTextureID));
@@ -106,11 +130,10 @@ bool cFBO::init(int width, int height, std::string& error)
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, this->vertexWorldPositionID, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, this->vertexSpecularID, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, this->vertexRefractionID, 0);
-	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, this->vertexDoNotLightID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, targets[0], this->vertexCubeMapID, 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, this->depthTextureID, 0);
 
-	glDrawBuffers(5, draw_bufer);
-
+	glDrawBuffers(6, draw_bufer);
 	//check FrameBuffer status is ready
 	bool bFBOReadyStatus = false;
 	
@@ -168,6 +191,7 @@ void cFBO::shutdown()
 	glDeleteTextures(1, &(this->vertexWorldPositionID));
 	glDeleteTextures(1, &(this->vertexSpecularID));
 	glDeleteTextures(1, &(this->vertexRefractionID));
+	glDeleteTextures(1, &(this->vertexCubeMapID));
 	glDeleteTextures(1, &(this->depthTextureID));
 	glDeleteFramebuffers(1, &(this->ID));
 }
@@ -188,6 +212,7 @@ void cFBO::clearBuffer(bool clearColor, bool clearDepth)
 		this->clearColorBuffer(2);
 		this->clearColorBuffer(3);
 		this->clearColorBuffer(4);
+		this->clearColorBuffer(5);
 	}
 	if (clearDepth)
 	{

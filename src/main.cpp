@@ -29,11 +29,11 @@
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
 #define FRAGMENT_SHADER_FILE    "src/shader/fragmentShader.glsl"
 #define TEXTURE_PATH            "asset/texture"
-#define USE_IMGUI false
+#define USE_IMGUI true
 
 
 glm::vec3 g_cameraEye = glm::vec3(0.0, 5.0, 0.0f);
-glm::vec3 g_cameraTarget = glm::vec3(-16.0f, 4.0f, 0.0f);
+glm::vec3 g_cameraTarget = glm::vec3(-2.5f, 2.5f, -15.0f);
 glm::vec3 g_upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 g_cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 bool bIsWalkAround = false;
@@ -78,6 +78,9 @@ void light4Setup();
 
 void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye, glm::vec3 target);
 void setFBOtoTexture(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector);
+void setFBOCubeMap(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye);
+void setFBOtoTextureCubeMap(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector);
+void setFBO2(cShaderManager* pShaderManager, cVAOManager* pVAOManager);
 
 int main(void)
 {
@@ -93,6 +96,7 @@ int main(void)
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
+
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -288,6 +292,14 @@ int main(void)
     result = pVAOManager->setInstanceObjScale("orb", 2.5);
     result = pVAOManager->setInstanceObjRGB("orb", glm::vec4(1.f, 1.f, 1.f, 0.3f));
     result = pVAOManager->setIslandModelFlag("orb", true);
+    result = pVAOManager->setInstanceObjVisible("orb", true);
+
+    result = pVAOManager->setInstanceObjScale("barrel1", 0.05);
+    result = pVAOManager->setInstanceObjVisible("barrel1", true);
+    result = pVAOManager->setInstanceObjRGB("barrel1", glm::vec4(1.f, 1.f, 1.f, 1.f));
+    result = pVAOManager->setTexture("barrel1", "Dungeons_2_Texture_01_A.bmp", 0);
+    result = pVAOManager->setInstanceObjLighting("barrel1", false);
+    //result = pVAOManager->setInstanceObjPosition("barrel1", glm::vec4(-12.5f, 2.5f, -15.f, 1.f));
 
     result = pVAOManager->setInstanceObjPosition("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
     //result = pVAOManager->set("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
@@ -315,8 +327,9 @@ int main(void)
 
         //glViewport(0, 0, width, height);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        setFBOPortal(::g_FBO_02, pShaderManager, pVAOManager, glm::vec4(-18,115,145,1.f), glm::vec4(200.f, 200.f, -100.f, 0.f));
-        setFBOPortal(::g_FBO_03, pShaderManager, pVAOManager, glm::vec4(-2.5f, 2.5f, -15.f, 1.f), glm::vec4(-2.5f,2.5f,0.f,1.f));
+        setFBO2(pShaderManager, pVAOManager);
+        setFBOPortal(::g_FBO_03, pShaderManager, pVAOManager, glm::vec3(-2.5f, 2.5f, -15.f), glm::vec3(-2.5f,0.f,0.f));
+        //setFBOCubeMap(::g_FBO_04, pShaderManager, pVAOManager, glm::vec3(-12.f, 2.5f, 0.f));
         //g_cameraEye = glm::vec4(0.f);
         //g_cameraTarget = glm::vec4(200.f, 200.f, -100.f, 0.f);
         //////////////////////////////////////////////////////////////
@@ -326,7 +339,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, ::g_FBO_01->width, ::g_FBO_01->height);
         ::g_FBO_01->clearBuffer(true, true);
-       
+
         //glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 cameraDirection = glm::normalize(g_cameraEye - g_cameraTarget);
         
@@ -334,7 +347,7 @@ int main(void)
         if (!bIsWalkAround)
         {
 
-            matView = glm::lookAt(::g_cameraEye, ::g_cameraTarget, ::g_upVector);
+            matView = glm::lookAt(::g_cameraEye, g_cameraTarget, ::g_upVector);
         }
         else
         {
@@ -354,9 +367,9 @@ int main(void)
         pShaderManager->setShaderUniformM4fv("mView", matView);
         pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
        
-        updateInstanceObj(pShaderManager, pVAOManager);
         setFBOtoTexture(g_FBO_02, pShaderManager, pVAOManager, "projecter2");
         setFBOtoTexture(g_FBO_03, pShaderManager, pVAOManager, "projecter3");
+        updateInstanceObj(pShaderManager, pVAOManager);
         //setFBOtoTexture(g_FBO_04, pShaderManager, pVAOManager, "projecter4");
 
         //////////////////////////////////////////////////////////////
@@ -419,6 +432,11 @@ int main(void)
         glActiveTexture(texture25_Unit + GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexRefractionID);
         pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture25_Unit);
+
+        GLuint texture40_Unit = 40;
+        glActiveTexture(texture40_Unit + GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, g_FBO_01->vertexCubeMapID);
+        pShaderManager->setShaderUniform1i("sampler_FBO_vertexCubeMap", texture40_Unit);
 
         if(toggleblur)
         { 
@@ -488,7 +506,10 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
             g_pTheLightManager->plight[7]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-0.4f, 1.4f, 0, 0);
             g_pTheLightManager->plight[8]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(0.7f, 1.2f, -0.3f, 0);
             g_pTheLightManager->plight[9]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-2.5f, -0.2f, 0, 0);
-
+            //std::cout << "Beholder position" << pCurrentMeshObject->position.x << ", " << pCurrentMeshObject->position.y << ", " << pCurrentMeshObject->position.z << std::endl;
+            //std::cout << "cameraEye " << g_cameraEye.x << ", " << g_cameraEye.y << ", " << g_cameraEye.z << std::endl;
+            //std::cout << "cameraTarget " << g_cameraTarget.x << ", " << g_cameraTarget.y << ", " << g_cameraTarget.z << std::endl;
+            //std::cout << "cameraFront " << g_cameraFront.x << ", " << g_cameraFront.y << ", " << g_cameraFront.z << std::endl;
         }
         if (pCurrentMeshObject->isIslandModel)
         {
@@ -538,43 +559,43 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     // AWSD AD-Left, Right
     //      WS-Forward, Back
     const float CAMERA_MOVE_SPEED = 5.f;
-    if (key == GLFW_KEY_A)
+    if (key == GLFW_KEY_LEFT)
     {
         //::g_cameraEye.x -= CAMERA_MOVE_SPEED;
         //::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
         g_MeshBoss->position.x -= 0.1;
     }
-    if (key == GLFW_KEY_D)
+    if (key == GLFW_KEY_RIGHT)
     {
         //::g_cameraEye.x += CAMERA_MOVE_SPEED;
         //::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
         g_MeshBoss->position.x += 0.1;
     }
-    if (key == GLFW_KEY_W)
+    if (key == GLFW_KEY_UP)
     {
         //::g_cameraEye.z -= CAMERA_MOVE_SPEED;
         //::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
         g_MeshBoss->position.z -= 0.1;
     }
-    if (key == GLFW_KEY_S)
+    if (key == GLFW_KEY_DOWN)
     {
         //::g_cameraEye.z += CAMERA_MOVE_SPEED;
         //::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
         g_MeshBoss->position.z += 0.1;
     }
-    if (key == GLFW_KEY_LEFT)
+    if (key == GLFW_KEY_A)
     {
         ::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
     }
-    if (key == GLFW_KEY_RIGHT)
+    if (key == GLFW_KEY_D)
     {
         ::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
     }
-    if (key == GLFW_KEY_UP)
+    if (key == GLFW_KEY_W)
     {
         ::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
     }
-    if (key == GLFW_KEY_DOWN)
+    if (key == GLFW_KEY_S)
     {
         ::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
     }
@@ -691,52 +712,53 @@ void setFBOPortal(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOMa
     fbo->clearBuffer(true, true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
-    if (!bIsWalkAround)
-    {
+    //if (!bIsWalkAround)
+    //{
+        //glm::vec3 eyeTemp = glm::normalize(glm::cross(g_upVector, (glm::normalize(g_cameraEye-eye) )));
         matView = glm::lookAt(eye, target, ::g_upVector);
-    }
-    else
-    {
-        matView = glm::lookAt(eye, eye + target, ::g_upVector);
-    }
+    //}
+    //else
+    //{
+    //    matView = glm::lookAt(eye, eye + target, ::g_upVector);
+    //}
     GLint eyeLocation_UniLoc = glGetUniformLocation(shaderID, "eyeLocation");
 
     glUniform4f(eyeLocation_UniLoc, eye.x, eye.y, eye.z, 1.0f);
 
     float FBO_screenRatio = static_cast<float>(fbo->width) / fbo->height;
     matProjection = glm::perspective(glm::radians(90.f), FBO_screenRatio, 0.1f, 10000.f);
-
     pShaderManager->setShaderUniformM4fv("mView", matView);
     pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
 
     updateInstanceObj(pShaderManager, pVAOManager);
+
 }
 
 void setFBOtoTexture(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector)
 {
     pShaderManager->setShaderUniform1f("bFullScreen", true);
     //set FBO to texture
-    GLuint texture21_Unit = 31;
+    GLuint texture21_Unit = 21;
     glActiveTexture(texture21_Unit + GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo->vertexMaterialColorID);
     pShaderManager->setShaderUniform1i("sampler_FBO_vertexMaterialColour", texture21_Unit);
 
-    GLuint texture22_Unit = 32;
+    GLuint texture22_Unit = 22;
     glActiveTexture(texture22_Unit + GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo->vertexNormalID);
     pShaderManager->setShaderUniform1i("sampler_FBO_vertexNormal", texture22_Unit);
 
-    GLuint texture23_Unit = 33;
+    GLuint texture23_Unit = 23;
     glActiveTexture(texture23_Unit + GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo->vertexWorldPositionID);
     pShaderManager->setShaderUniform1i("sampler_FBO_vertexWorldPos", texture23_Unit);
 
-    GLuint texture24_Unit = 34;
+    GLuint texture24_Unit = 24;
     glActiveTexture(texture24_Unit + GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo->vertexSpecularID);
     pShaderManager->setShaderUniform1i("sampler_FBO_vertexSpecular", texture24_Unit);
 
-    GLuint texture25_Unit = 35;
+    GLuint texture25_Unit = 25;
     glActiveTexture(texture25_Unit + GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo->vertexRefractionID);
     pShaderManager->setShaderUniform1i("sampler_FBO_vertexRefraction", texture25_Unit);
@@ -751,4 +773,119 @@ void setFBOtoTexture(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVA
     result = pVAOManager->setInstanceObjVisible(projector, false);
     pShaderManager->setShaderUniform1f("bMirror", false);
     pShaderManager->setShaderUniform1f("bFullScreen", false);
+}
+
+void setFBOCubeMap(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye)
+{
+    glm::mat4x4 matProjection;
+    glm::mat4x4 matView;
+
+    GLuint shaderID = pShaderManager->getIDfromName("Shader01");
+
+    //FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo->ID);
+    glViewport(0, 0, fbo->width, fbo->height);
+    fbo->clearBuffer(true, true);
+    for (int i = 0; i < 6; i++)
+    {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, fbo->ID, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
+        switch (GL_TEXTURE_CUBE_MAP_POSITIVE_X + i)
+        {
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+            matView = glm::lookAt(eye, eye + glm::vec3(10, 0, 0), glm::vec3(0, -1, 0));
+            break;
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+            matView = glm::lookAt(eye, eye + glm::vec3(-10, 0, 0), glm::vec3(0, -1, 0));
+            break;
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+            matView = glm::lookAt(eye, eye + glm::vec3(0, 10, 0), glm::vec3(0, 0, 1));
+            break;
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+            matView = glm::lookAt(eye, eye + glm::vec3(0, -10, 0), glm::vec3(0, 0, -1));
+            break;
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+            matView = glm::lookAt(eye, eye + glm::vec3(0, 0, 10), glm::vec3(0, -1, 0));
+            break;
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+            matView = glm::lookAt(eye, eye + glm::vec3(0, 0, -10), glm::vec3(0, -1, 0));
+            break;
+        default:
+            break;
+        }
+
+        GLint eyeLocation_UniLoc = glGetUniformLocation(shaderID, "eyeLocation");
+
+        glUniform4f(eyeLocation_UniLoc, eye.x, eye.y, eye.z, 1.0f);
+
+        float FBO_screenRatio = static_cast<float>(fbo->width) / fbo->height;
+        matProjection = glm::perspective(glm::radians(90.f), 1.f, 1.f, 10000.f);
+
+        pShaderManager->setShaderUniformM4fv("mView", matView);
+        pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
+
+        updateInstanceObj(pShaderManager, pVAOManager);
+    }
+}
+
+void setFBOtoTextureCubeMap(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector)
+{
+    pShaderManager->setShaderUniform1f("bDynCubeMap", true);
+    //set FBO to texture
+
+    GLuint texture40_Unit = 40;
+    glActiveTexture(texture40_Unit + GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, fbo->vertexCubeMapID);
+    pShaderManager->setShaderUniform1i("sampler_FBO_vertexCubeMap", texture40_Unit);
+
+    //pShaderManager->setShaderUniform1f("blurAmount", 0.5f);
+    glm::mat4 scrMAT = glm::mat4(1.f);
+    cMeshObj* scrOBJ = pVAOManager->findMeshObjAddr(projector);
+    //bool result = pVAOManager->setInstanceObjScale("projecter1", 100.f);
+    bool result = pVAOManager->setInstanceObjVisible(projector, true);
+    drawObj(scrOBJ, scrMAT, pShaderManager, pVAOManager);
+    result = pVAOManager->setInstanceObjVisible(projector, false);
+    pShaderManager->setShaderUniform1f("bDynCubeMap", false);
+}
+
+void setFBO2(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
+{
+    glm::mat4x4 matProjection;
+    glm::mat4x4 matView;
+
+    GLuint shaderID = pShaderManager->getIDfromName("Shader01");
+
+    //FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, g_FBO_02->ID);
+    glViewport(0, 0, g_FBO_02->width, g_FBO_02->height);
+    g_FBO_02->clearBuffer(true, true);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glm::vec3 eye = glm::vec3(-3.5f, 5.f, 11.f);
+    //std::cout << "g_cameraEye" << g_cameraEye.x << " : " << g_cameraEye.y << " : " << g_cameraEye.z << std::endl;
+    //if (!bIsWalkAround)
+    //{
+    matView = glm::lookAt(eye, g_cameraTarget, ::g_upVector);
+    //}
+    //else
+    //{
+    //    matView = glm::lookAt(eye, eye + target, ::g_upVector);
+    //}
+    GLint eyeLocation_UniLoc = glGetUniformLocation(shaderID, "eyeLocation");
+
+    glUniform4f(eyeLocation_UniLoc, eye.x, eye.y, eye.z, 1.0f);
+
+    float FBO_screenRatio = static_cast<float>(g_FBO_02->width) / g_FBO_02->height;
+    matProjection = glm::perspective(glm::radians(90.f), FBO_screenRatio, 0.1f, 10000.f);
+    pShaderManager->setShaderUniformM4fv("mView", matView);
+    pShaderManager->setShaderUniformM4fv("mProjection", matProjection);
+
+    glm::mat4 scrMAT = glm::mat4(1.f);
+    cMeshObj* scrOBJ = pVAOManager->findMeshObjAddr("barrel1");
+    pShaderManager->setShaderUniform1f("blurAmount", 0.f);
+    bool result = pVAOManager->setInstanceObjVisible("barrel1", true);
+    drawObj(scrOBJ, scrMAT, pShaderManager, pVAOManager);
+    result = pVAOManager->setInstanceObjVisible("barrel1", false);
+    
+    //updateInstanceObj(pShaderManager, pVAOManager);
 }

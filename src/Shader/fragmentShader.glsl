@@ -224,7 +224,7 @@ void main()
 	FBO_vertexWorldPos = vec4(fVertWorldLocation.xyz, 1.f);
 	if ( bDoNotLight )
 	{
-		//pixelOutputColor = vec4(materialColor.rgb, alphaTransparency);
+		pixelOutputColor = vec4(materialColor.rgb, 1.f);
 		FBO_vertexNormal = vec4(1.f);
 
 		return;
