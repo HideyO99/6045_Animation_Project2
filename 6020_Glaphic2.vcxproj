@@ -24,6 +24,7 @@
     <ProjectGuid>{43e43f66-7c3b-452c-bf0f-f35b3b0396a4}</ProjectGuid>
     <RootNamespace>My6028final</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>6045_Animation_Project2</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -144,6 +145,8 @@
     <ClCompile Include="dev\inc\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="dev\inc\imgui\imgui_tables.cpp" />
     <ClCompile Include="dev\inc\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Animation\AnimationManager.cpp" />
+    <ClCompile Include="src\Animation\cAnimation.cpp" />
     <ClCompile Include="src\callBack.cpp" />
     <ClCompile Include="src\cAssimpModel.cpp" />
     <ClCompile Include="src\drawOBJ.cpp" />
@@ -155,6 +158,7 @@
     <ClCompile Include="src\Light\cLightManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MeshObj\cMeshObj.cpp" />
+    <ClCompile Include="src\MeshObj\Model.cpp" />
     <ClCompile Include="src\Shader\cShader.cpp" />
     <ClCompile Include="src\Shader\cShaderManager.cpp" />
     <ClCompile Include="src\Shader\cShaderProgram.cpp" />
@@ -176,6 +180,8 @@
     <ClInclude Include="dev\inc\imgui\imstb_rectpack.h" />
     <ClInclude Include="dev\inc\imgui\imstb_textedit.h" />
     <ClInclude Include="dev\inc\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\Animation\AnimationManager.h" />
+    <ClInclude Include="src\Animation\cAnimation.h" />
     <ClInclude Include="src\cAssimpModel.h" />
     <ClInclude Include="src\FBO\cFBO.h" />
     <ClInclude Include="src\globalOpenGL.h" />
@@ -183,6 +189,8 @@
     <ClInclude Include="src\Light\cLight.h" />
     <ClInclude Include="src\Light\cLightManager.h" />
     <ClInclude Include="src\MeshObj\cMeshObj.h" />
+    <ClInclude Include="src\MeshObj\Model.h" />
+    <ClInclude Include="src\MeshObj\vertex_type.h" />
     <ClInclude Include="src\Shader\cShaderManager.h" />
     <ClInclude Include="src\Texture\C24BitBMPpixel.h" />
     <ClInclude Include="src\Texture\cTextureFromFile.h" />

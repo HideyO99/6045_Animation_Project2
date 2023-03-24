@@ -238,7 +238,7 @@ int main(void)
     ::g_pTextureManager->create2DTextureFromFreeImgLib("glowing-fire-flame_bw.bmp");
     ::g_pTextureManager->create2DTextureFromFreeImgLib("photos_2018_7_4_fst_water-blue.bmp");
     ::g_pTextureManager->create2DTextureFromFreeImgLib("Beholder_Base_color.bmp");
-    ::g_pTextureManager->create2DTextureFromFreeImgLib("man_Packed0_Diffuse.png");
+    ::g_pTextureManager->create2DTextureFromFreeImgLib("ply_tex_20308190_gacha.png");
 
     std::string load_texture_error = "";
     if (g_pTextureManager->createCubeTextureFromFreeImgLib("SpaceBox",
@@ -306,10 +306,12 @@ int main(void)
     result = pVAOManager->setInstanceObjLighting("barrel1", false);
     //result = pVAOManager->setInstanceObjPosition("barrel1", glm::vec4(-12.5f, 2.5f, -15.f, 1.f));
 
-    result = pVAOManager->setInstanceObjScale("man1", 0.02);
-    result = pVAOManager->setTexture("man1", "man_Packed0_Diffuse.png", 0);
+    result = pVAOManager->setInstanceObjScale("man1", 5.0f);
+    result = pVAOManager->setTexture("man1", "ply_tex_20308190_gacha.png", 0);
+    result = pVAOManager->setInstanceObjLighting("man1", false);
 
     result = pVAOManager->setInstanceObjPosition("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
+    result = pVAOManager->setInstanceObjLighting("boss", false);
     //result = pVAOManager->set("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
     g_MeshBoss = pVAOManager->findMeshObjAddr("boss");
     light0Setup(); // Dir light
@@ -528,7 +530,13 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
         {
             pShaderManager->setShaderUniform1f("bIsSkyboxObject", (GLfloat)GL_TRUE);
             pCurrentMeshObject->position = ::g_cameraEye;
-            pCurrentMeshObject->scale = 7500.f;
+            pCurrentMeshObject->scale = glm::vec3(7500.f);
+        }
+        if (pCurrentMeshObject->instanceName == "man1")
+        {
+            g_pTheLightManager->plight[7]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-0.4f, 1.4f, 0, 0);
+            g_pTheLightManager->plight[8]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(0.7f, 1.2f, -0.3f, 0);
+            g_pTheLightManager->plight[9]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-2.5f, -0.2f, 0, 0);
         }
         matModel = glm::mat4x4(1.0f);
 

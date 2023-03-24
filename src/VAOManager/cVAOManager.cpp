@@ -171,7 +171,7 @@ bool cVAOManager::loadModelList(std::string filename, unsigned int shaderProgram
 				return false;
 			}
 		}
-		if (fileType == "fbx")
+		else //if (fileType == "fbx")
 		{
 			cModelDrawInfo* modelDrawInfo = new cModelDrawInfo();
 			//cMeshObj meshObj;
@@ -356,8 +356,8 @@ bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo)
 			const aiBone* bone = mesh->mBones[i_bones];
 			for (int i = 0; i < bone->mNumWeights; i++)
 			{
-				//const aiVertexWeight vw = bone->mWeights[i];
-				//modelDrawInfo->pVertices[vw.mVertexId];
+				const aiVertexWeight vw = bone->mWeights[i];
+				modelDrawInfo->pVertices[vw.mVertexId];
 			}
 			//modelDrawInfo->pVertices[i_vertices].vBoneID[0] = mesh->mBones[i_bones]->mWeights[]
 			//modelDrawInfo->pVertices[i_vertices].vBoneWeight[0] = mesh->mBones[i_vertices]->mWeights[0].mWeight;
@@ -478,7 +478,7 @@ bool cVAOManager::setInstanceObjScale(std::string meshObjName, float value)
 	}
 	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
 
-	pCurrentMeshObject->scale = value;
+	pCurrentMeshObject->scale = glm::vec3(value);
 
 	return true;
 }
@@ -684,7 +684,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->bUse_RGBA_colour = false;
 			itCurrentMesh->second->textures[0] = textureFile;
 			itCurrentMesh->second->textureRatios[0] = 1;
-			itCurrentMesh->second->scale = 0.01;
+			itCurrentMesh->second->scale = glm::vec3(0.01);
 			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
 			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
 			itCurrentMesh->second->isVisible = true;
@@ -695,7 +695,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->bUse_RGBA_colour = false;
 			itCurrentMesh->second->textures[0] = textureFile;
 			itCurrentMesh->second->textureRatios[0] = 1;
-			itCurrentMesh->second->scale = 0.03;
+			itCurrentMesh->second->scale = glm::vec3(0.03);
 			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
 			itCurrentMesh->second->position.y = 3.f;
 			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
@@ -706,7 +706,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 			itCurrentMesh->second->bUse_RGBA_colour = false;
 			itCurrentMesh->second->textures[0] = textureFile;
 			itCurrentMesh->second->textureRatios[0] = 1;
-			itCurrentMesh->second->scale = 0.5;
+			itCurrentMesh->second->scale = glm::vec3(0.5);
 			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
 			itCurrentMesh->second->position.y = 4.f;
 			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;
@@ -714,7 +714,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 		}
 		if ((itCurrentMesh->second->meshName == "terrain"))
 		{
-			itCurrentMesh->second->scale = 20;
+			itCurrentMesh->second->scale = glm::vec3(20);
 			itCurrentMesh->second->position.x = -124.8f;
 			itCurrentMesh->second->position.y = -40.f;
 			itCurrentMesh->second->position.z = -1.6f;
@@ -725,7 +725,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 		}
 		if ((itCurrentMesh->second->meshName == "water"))
 		{
-			itCurrentMesh->second->scale = 1.1f;
+			itCurrentMesh->second->scale = glm::vec3(1.1f);
 			itCurrentMesh->second->position.x = -167.7f;
 			itCurrentMesh->second->position.y = -10.5f;
 			itCurrentMesh->second->position.z = -54.f;
@@ -740,7 +740,7 @@ bool cVAOManager::setDungeonTexture(std::string meshObjName, std::string texture
 		}
 		if ((itCurrentMesh->second->meshName == "boss"))
 		{
-			itCurrentMesh->second->scale = 0.8;
+			itCurrentMesh->second->scale = glm::vec3(0.8);
 			itCurrentMesh->second->position.x = -27.5f;
 			itCurrentMesh->second->position.y = 1.f;
 			itCurrentMesh->second->position.z = 0.f;
@@ -780,7 +780,7 @@ bool cVAOManager::setTorchTexture(std::string meshObjName, std::string textureFi
 			itCurrentMesh->second->textures[0] = textureFile;
 			itCurrentMesh->second->textures[7] = markTextureFile;
 			itCurrentMesh->second->textureRatios[0] = 1;
-			itCurrentMesh->second->scale = 7.5;
+			itCurrentMesh->second->scale = glm::vec3(7.5);
 			itCurrentMesh->second->position.x = itCurrentMesh->second->position.x * 5;
 			itCurrentMesh->second->position.y = 4.5f;
 			itCurrentMesh->second->position.z = itCurrentMesh->second->position.z * 5;

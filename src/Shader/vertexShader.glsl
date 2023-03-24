@@ -1,13 +1,13 @@
 #version 420
 
-layout (location = 0) in vec4 vColour ;
-layout (location = 1) in vec4 vPosition ;
+layout (location = 0) in vec4 vPosition ;
+layout (location = 1) in vec4 vUVx2;
 layout (location = 2) in vec4 vNormal ;		
-layout (location = 3) in vec4 vUVx2;
-layout (location = 4) in vec4 vTangent;
-layout (location = 5) in vec4 vBiNormal;
-layout (location = 6) in vec4 vBoneID;
-layout (location = 7) in vec4 vBoneWeight;
+layout (location = 3) in vec4 vBoneID;
+layout (location = 4) in vec4 vBoneWeight;
+layout (location = 5) in vec4 vTangent;
+layout (location = 6) in vec4 vBiNormal;
+layout (location = 7) in vec4 vColour ;
 
 // Going "out" to the fragment shader
 out vec4 fColor;		

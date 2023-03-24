@@ -25,7 +25,7 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
     {
         pShaderManager->setShaderUniform1f("bUseDiscardTexture", (GLfloat)GL_TRUE);
 
-        if ((pCurrentMeshObject->scale < 8.5))
+        if ((pCurrentMeshObject->scale.x < 8.5))
         {
             pCurrentMeshObject->scale += 0.05f;
             g_pTheLightManager->plight[1]->attenuation -= glm::vec4(0.001, 0.0001, 0.00002, 0);
@@ -37,7 +37,7 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
         }
         else
         {
-            pCurrentMeshObject->scale = 7;
+            pCurrentMeshObject->scale.x = 7;
             g_pTheLightManager->plight[1]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
             g_pTheLightManager->plight[2]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
             g_pTheLightManager->plight[3]->attenuation = glm::vec4(0.7f, 0.1f, 0.2f, 1.0f);
@@ -70,8 +70,8 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
     glm::mat4 matRoationX = glm::rotate(glm::mat4(1.0f), pCurrentMeshObject->rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 
     // Scale the object
-    float uniformScale = pCurrentMeshObject->scale;
-    glm::mat4 matScale = glm::scale(glm::mat4(1.0f), glm::vec3(uniformScale, uniformScale, uniformScale));
+    glm::vec3 uniformScale = pCurrentMeshObject->scale;
+    glm::mat4 matScale = glm::scale(glm::mat4(1.0f), uniformScale);
 
     matModel = matModel * matTranslation;
 
@@ -205,12 +205,7 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
 
             for (size_t i = 0; i < it->second.size(); i++)
             {
-                GLuint texture_Number = ::g_pTextureManager->getTexttureID(it->second[i]->TextureFile);
-                GLuint texture_Unit = 0;
-                glActiveTexture(texture_Unit + GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, texture_Number);
-                pShaderManager->setShaderUniform1i("texture0", texture_Number);
-                //glBindVertexArray(drawingInformation.VAO_ID);
+
                 glBindVertexArray(it->second[i]->VAO_ID);
 
                 //glDrawElements(GL_TRIANGLES, drawingInformation.numberOfIndices, GL_UNSIGNED_INT, (void*)0);

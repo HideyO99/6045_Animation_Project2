@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 //#include <glm/vec3.hpp>
+#include "../Animation/cAnimation.h"
 
 #define MOVINGTEXTURE true
 
@@ -16,7 +17,7 @@ public:
 	std::string instanceName;
 	glm::vec3 position;
 	glm::vec3 rotation;
-	float scale;
+	glm::vec3 scale;
 	bool isWireframe;
 	glm::vec4 color_RGBA;
 	bool bUse_RGBA_colour;
@@ -31,6 +32,8 @@ public:
 	float time;
 	bool isMovingTexture;
 #endif
+
+	cAnimation Animation;
 
 	std::vector<cMeshObj*> vecChildMesh;
 	
