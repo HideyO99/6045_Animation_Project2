@@ -307,7 +307,7 @@ int main(void)
     //result = pVAOManager->setInstanceObjPosition("barrel1", glm::vec4(-12.5f, 2.5f, -15.f, 1.f));
 
     result = pVAOManager->setInstanceObjScale("man1", 5.0f);
-    result = pVAOManager->setTexture("man1", "ply_tex_20308190_gacha.png", 0);
+    //result = pVAOManager->setTexture("man1", "ply_tex_20308190_gacha.png", 0);
     result = pVAOManager->setInstanceObjLighting("man1", false);
 
     result = pVAOManager->setInstanceObjPosition("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
@@ -532,12 +532,12 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
             pCurrentMeshObject->position = ::g_cameraEye;
             pCurrentMeshObject->scale = glm::vec3(7500.f);
         }
-        if (pCurrentMeshObject->instanceName == "man1")
-        {
-            g_pTheLightManager->plight[7]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-0.4f, 1.4f, 0, 0);
-            g_pTheLightManager->plight[8]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(0.7f, 1.2f, -0.3f, 0);
-            g_pTheLightManager->plight[9]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-2.5f, -0.2f, 0, 0);
-        }
+        //if (pCurrentMeshObject->instanceName == "man1")
+        //{
+        //    g_pTheLightManager->plight[7]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-0.4f, 1.4f, 0, 0);
+        //    g_pTheLightManager->plight[8]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(0.7f, 1.2f, -0.3f, 0);
+        //    g_pTheLightManager->plight[9]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-2.5f, -0.2f, 0, 0);
+        //}
         matModel = glm::mat4x4(1.0f);
 
 #if MOVINGTEXTURE

@@ -2,6 +2,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <vector>
+#include <map>
 //#include <glm/vec3.hpp>
 #include "../Animation/cAnimation.h"
 
@@ -34,6 +35,9 @@ public:
 #endif
 
 	cAnimation Animation;
+
+	std::vector<BoneInfo> boneInfoVec;
+	std::map<std::string, int> boneNameToIdMap;
 
 	std::vector<cMeshObj*> vecChildMesh;
 	

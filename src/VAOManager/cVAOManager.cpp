@@ -147,40 +147,46 @@ bool cVAOManager::loadModelList(std::string filename, unsigned int shaderProgram
 	}
 
 	std::map<std::string, std::string>::iterator i_mapModel;
+	std::map<std::string, std::string>::iterator i_instanceToModel;
 
-	for (i_mapModel = modelListXML.mapModelNameAndPath.begin(); i_mapModel != modelListXML.mapModelNameAndPath.end(); i_mapModel++)
+	//for (i_mapModel = modelListXML.mapModelNameAndPath.begin(); i_mapModel != modelListXML.mapModelNameAndPath.end(); i_mapModel++)
+	for (i_instanceToModel = modelListXML.mapInstanceAndModelName.begin(); i_instanceToModel != modelListXML.mapInstanceAndModelName.end(); i_instanceToModel++)
 	{
-		std::string fileType = i_mapModel->second.substr(i_mapModel->second.find('.')+1,std::string::npos);
-		if (fileType == "ply")
+		cModelDrawInfo tmp;
+		if (!FindDrawInfo(i_instanceToModel->second.c_str(), tmp))
 		{
-			cModelDrawInfo modelDrawInfo;
-			//cMeshObj meshObj;
-			std::string error = "";
+			i_mapModel = modelListXML.mapModelNameAndPath.find(i_instanceToModel->second);
+				std::string fileType = i_mapModel->second.substr(i_mapModel->second.find('.') + 1, std::string::npos);
+				if (fileType == "ply")
+				{
+					cModelDrawInfo modelDrawInfo;
+						//cMeshObj meshObj;
+						std::string error = "";
 
-			result = loadPLYFile(i_mapModel->second, modelDrawInfo, error);
-			if (!result)
-			{
-				std::cout << "cannot load " << i_mapModel->first << std::endl;
-				std::cout << "error " << error << std::endl;
-				return false;
-			}
-			result = loadModelToVAO(i_mapModel->first, &modelDrawInfo, shaderProgramID);
-			if (!result)
-			{
-				std::cout << "cannot load " << i_mapModel->first << std::endl;
-				return false;
-			}
+						result = loadPLYFile(i_mapModel->second, modelDrawInfo, error);
+						if (!result)
+						{
+							std::cout << "cannot load " << i_mapModel->first << std::endl;
+							std::cout << "error " << error << std::endl;
+							return false;
+						}
+					result = loadModelToVAO(i_mapModel->first, &modelDrawInfo, shaderProgramID);
+					if (!result)
+					{
+						std::cout << "cannot load " << i_mapModel->first << std::endl;
+						return false;
+					}
+				}
+				else //if (fileType == "fbx")
+				{
+					cModelDrawInfo* modelDrawInfo = new cModelDrawInfo();
+					//cMeshObj meshObj;
+
+					result = loadFBXFile(i_mapModel, i_instanceToModel->first.c_str(), modelDrawInfo, shaderProgramID);
+				}
+			//mapModelNametoMeshObj.emplace(i_mapModel->first, meshObj);
+			std::cout << i_mapModel->first << " is loaded" << std::endl;
 		}
-		else //if (fileType == "fbx")
-		{
-			cModelDrawInfo* modelDrawInfo = new cModelDrawInfo();
-			//cMeshObj meshObj;
-			
-			//result = loadFBXFile(i_mapModel->second, modelDrawInfo, shaderProgramID);
-			result = loadFBXFile(i_mapModel, modelDrawInfo, shaderProgramID);
-		}
-		//mapModelNametoMeshObj.emplace(i_mapModel->first, meshObj);
-		std::cout << i_mapModel->first << " is loaded" << std::endl;
 	}
 	cameraEyeFromXML = modelListXML.cameraEyeFromXML;
 	
@@ -203,7 +209,7 @@ bool cVAOManager::FindDrawInfo(std::string filename, cModelDrawInfo& drawInfo)
 }
 
 //bool cVAOManager::loadFBXFile(std::string filename, cModelDrawInfo* modelDrawInfo, unsigned int shaderProgramID)
-bool cVAOManager::loadFBXFile(std::map<std::string, std::string>::iterator i_mapModel, cModelDrawInfo* modelDrawInfo, unsigned int shaderProgramID)
+bool cVAOManager::loadFBXFile(std::map<std::string, std::string>::iterator i_mapModel, std::string meshName ,cModelDrawInfo* modelDrawInfo, unsigned int shaderProgramID)
 {
 	const aiScene* scene = m_Importer.ReadFile(i_mapModel->second, ASSIMP_LOAD_FLAGS);
 
@@ -246,6 +252,7 @@ bool cVAOManager::loadFBXFile(std::map<std::string, std::string>::iterator i_map
 
 
 	std::vector<cModelDrawInfo*> vecModelDraw;
+	cMeshObj* meshObj = findMeshObjAddr(meshName);
 
 	for (int i = 0; i < scene->mNumMeshes; i++)
 	{
@@ -253,13 +260,17 @@ bool cVAOManager::loadFBXFile(std::map<std::string, std::string>::iterator i_map
 		aiMesh* mesh = scene->mMeshes[i];
 		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
 		aiString texturePath;
-		loadMesh(mesh, modelDrawInfo);
+		loadMesh(mesh, modelDrawInfo, meshObj);
 		if(i==0)
 		{ 
 			loadModelToVAO(i_mapModel->first, modelDrawInfo, shaderProgramID);
 		}
 		else
 		{
+			cMeshObj* childMeshObj = new cMeshObj();
+			childMeshObj->instanceName = mesh->mName.C_Str();
+			childMeshObj->meshName = mesh->mName.C_Str();
+			meshObj->vecChildMesh.push_back(childMeshObj);
 			loadModelToVAO(mesh->mName.C_Str(), modelDrawInfo, shaderProgramID);
 		}
 		if (mat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath, NULL, NULL, NULL, NULL, NULL) == aiReturn_SUCCESS)
@@ -267,20 +278,63 @@ bool cVAOManager::loadFBXFile(std::map<std::string, std::string>::iterator i_map
 			std::string tmp = texturePath.data;
 			modelDrawInfo->TextureFile = tmp.substr(tmp.find_last_of("/\\") + 1, std::string::npos);
 		}
-		vecModelDraw.push_back(modelDrawInfo);
+		//vecModelDraw.push_back(modelDrawInfo);
 	}
-	mapModeltoMultiMesh.emplace(i_mapModel->first, vecModelDraw);
+	//mapModeltoMultiMesh.emplace(i_mapModel->first, vecModelDraw);
 
 
 	return true;
 }
 
-bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo)
+bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo, cMeshObj* meshObj)
 {
 	modelDrawInfo->numberOfVertices = mesh->mNumVertices;
 	modelDrawInfo->numberOfIndices = mesh->mNumFaces * 3;
 	modelDrawInfo->numberOfTriangles = mesh->mNumFaces;
 	modelDrawInfo->pVertices = new cModelDrawInfo::sVertex_RGBA_XYZ_N_UV_T_BiN_Bones[modelDrawInfo->numberOfVertices];
+
+	int totalBoneWeights = 0;
+	std::vector<BoneVertexData> boneVertexData;
+	boneVertexData.resize(mesh->mNumVertices);
+	int boneCount = 0;
+
+	if (mesh->HasBones())
+	{
+		unsigned int numBone = mesh->mNumBones;
+		for (int i_bones = 0; i_bones < numBone; i_bones++)
+		{
+			const aiBone* bone = mesh->mBones[i_bones];
+			std::string boneName = bone->mName.C_Str();
+			int boneIDx = 0;
+			std::map<std::string, int>::iterator it = meshObj->boneNameToIdMap.find(boneName);
+			if (it == meshObj->boneNameToIdMap.end())
+			{
+				boneIDx = boneCount;
+				boneCount++;
+				BoneInfo boneInfo;
+				boneInfo.name = boneName;
+				meshObj->boneInfoVec.push_back(boneInfo);
+				meshObj->boneNameToIdMap.emplace(boneName, boneIDx);
+			}
+			else
+			{
+				boneIDx = meshObj->boneNameToIdMap[boneName];
+			}
+			//todo
+
+			for (int i = 0; i < bone->mNumWeights; i++)
+			{
+				const aiVertexWeight vw = bone->mWeights[i];
+				float weight = vw.mWeight;
+				int vertID = vw.mVertexId;
+				boneVertexData[vertID].AddBoneInfo(boneIDx, weight);
+				//modelDrawInfo->pVertices[vw.mVertexId];
+			}
+			//modelDrawInfo->pVertices[i_vertices].vBoneID[0] = mesh->mBones[i_bones]->mWeights[]
+			//modelDrawInfo->pVertices[i_vertices].vBoneWeight[0] = mesh->mBones[i_vertices]->mWeights[0].mWeight;
+		}
+
+	}
 
 	for (int i_vertices = 0; i_vertices < modelDrawInfo->numberOfVertices; i_vertices++)
 	{
@@ -338,32 +392,16 @@ bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo)
 			modelDrawInfo->pVertices[i_vertices].v1 = 0;
 		}
 
-		modelDrawInfo->pVertices[i_vertices].vBoneWeight[0] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneWeight[1] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneWeight[2] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneWeight[3] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneID[0] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneID[1] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneID[2] = 0;
-		modelDrawInfo->pVertices[i_vertices].vBoneID[3] = 0;
+		modelDrawInfo->pVertices[i_vertices].vBoneWeight[0] = boneVertexData[i_vertices].weights[0];
+		modelDrawInfo->pVertices[i_vertices].vBoneWeight[1] = boneVertexData[i_vertices].weights[1];
+		modelDrawInfo->pVertices[i_vertices].vBoneWeight[2] = boneVertexData[i_vertices].weights[2];
+		modelDrawInfo->pVertices[i_vertices].vBoneWeight[3] = boneVertexData[i_vertices].weights[3];
+		modelDrawInfo->pVertices[i_vertices].vBoneID[0] = boneVertexData[i_vertices].ids[0];
+		modelDrawInfo->pVertices[i_vertices].vBoneID[1] = boneVertexData[i_vertices].ids[1];
+		modelDrawInfo->pVertices[i_vertices].vBoneID[2] = boneVertexData[i_vertices].ids[2];
+		modelDrawInfo->pVertices[i_vertices].vBoneID[3] = boneVertexData[i_vertices].ids[3];
 	}
 
-	if (mesh->HasBones())
-	{
-		unsigned int numBone = mesh->mNumBones;
-		for (int i_bones = 0; i_bones < numBone; i_bones++)
-		{
-			const aiBone* bone = mesh->mBones[i_bones];
-			for (int i = 0; i < bone->mNumWeights; i++)
-			{
-				const aiVertexWeight vw = bone->mWeights[i];
-				modelDrawInfo->pVertices[vw.mVertexId];
-			}
-			//modelDrawInfo->pVertices[i_vertices].vBoneID[0] = mesh->mBones[i_bones]->mWeights[]
-			//modelDrawInfo->pVertices[i_vertices].vBoneWeight[0] = mesh->mBones[i_vertices]->mWeights[0].mWeight;
-		}
-
-	}
 
 	unsigned int vertex_element_index_index = 0;
 	modelDrawInfo->pIndices = new unsigned int[modelDrawInfo->numberOfIndices];
