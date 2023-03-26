@@ -33,6 +33,11 @@ public:
 	float time;
 	bool isMovingTexture;
 #endif
+	bool hasBone;
+
+	std::vector<glm::mat4> BoneModelMatrices;
+	std::vector<glm::mat4> GlobalTransformations;
+	glm::mat4 BoneRotationMatrices[66];
 
 	cAnimation Animation;
 

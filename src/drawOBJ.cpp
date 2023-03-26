@@ -2,9 +2,11 @@
 #include "Shader/cShaderManager.h"
 #include "Light/cLightManager.h"
 #include "Texture/cTextureManager.h"
+#include "boneShader.h"
 
 extern cLightManager* g_pTheLightManager;
 extern cTextureManager* g_pTextureManager;
+extern BoneShader gBoneShader;
 
 void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShaderManager* pShaderManager, cVAOManager* pVAOManager)
 {
@@ -87,6 +89,15 @@ void drawObj(cMeshObj* pCurrentMeshObject, glm::mat4x4 mat_PARENT_Model, cShader
 
     glm::mat4 mModelInverseTransform = glm::inverse(glm::transpose(matModel));
     pShaderManager->setShaderUniformM4fv("mModelInverseTranspose", mModelInverseTransform);
+
+    if (pCurrentMeshObject->hasBone)
+    {
+        for (int i = 0; i < pCurrentMeshObject->BoneModelMatrices.size(); i++)
+        {
+            glUniformMatrix4fv(gBoneShader.BoneMatrices[i], 1, GL_FALSE, glm::value_ptr(pCurrentMeshObject->BoneModelMatrices[i]));
+            glUniformMatrix4fv(gBoneShader.BoneRotationMatrices[i], 1, GL_FALSE, glm::value_ptr(pCurrentMeshObject->BoneRotationMatrices[i]));
+        }
+    }
 
     // Wireframe
     if (pCurrentMeshObject->isWireframe)

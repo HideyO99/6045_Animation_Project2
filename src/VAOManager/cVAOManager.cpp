@@ -301,6 +301,7 @@ bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo, cM
 	if (mesh->HasBones())
 	{
 		unsigned int numBone = mesh->mNumBones;
+		meshObj->hasBone = true;
 		for (int i_bones = 0; i_bones < numBone; i_bones++)
 		{
 			const aiBone* bone = mesh->mBones[i_bones];

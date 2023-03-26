@@ -30,6 +30,8 @@ cMeshObj::cMeshObj()
 	this->time = 0;
 	this->isMovingTexture = false;
 #endif
+
+	this->hasBone = false;
 }
 
 cMeshObj::~cMeshObj()

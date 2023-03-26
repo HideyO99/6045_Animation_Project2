@@ -24,6 +24,7 @@
 #include "GUI/cGUI.h"
 #include "Texture/cTextureManager.h"
 #include "FBO/cFBO.h"
+#include "boneShader.h"
 
 #define MODEL_LIST_XML          "asset/model.xml"
 #define VERTEX_SHADER_FILE      "src/shader/vertexShader.glsl"
@@ -58,6 +59,8 @@ cFBO* g_FBO_03 = NULL;
 cFBO* g_FBO_04 = NULL;
 cMeshObj* g_MeshBoss = NULL;
 
+
+
 extern void error_callback(int error, const char* description);
 extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 extern void mouse_callback(GLFWwindow* window, double xposIn, double yposIn);
@@ -78,6 +81,8 @@ void setFBOtoTexture(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVA
 void setFBOCubeMap(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, glm::vec3 eye);
 void setFBOtoTextureCubeMap(cFBO* fbo, cShaderManager* pShaderManager, cVAOManager* pVAOManager, std::string projector);
 void setFBO2(cShaderManager* pShaderManager, cVAOManager* pVAOManager);
+
+void setupBoneShaderLocation(cShaderManager* pShaderManager);
 
 int main(void)
 {
@@ -192,6 +197,7 @@ int main(void)
 
     
     ::g_pTheLightManager->loadLightUniformLocation(shaderID);
+    setupBoneShaderLocation(shaderID);
 #if USE_IMGUI
     for (size_t i = 0; i < MAX_LIGHT_SOURCE; i++)
     {
@@ -532,6 +538,10 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
             pCurrentMeshObject->position = ::g_cameraEye;
             pCurrentMeshObject->scale = glm::vec3(7500.f);
         }
+        if (pCurrentMeshObject->hasBone)
+        {
+            pShaderManager->setShaderUniform1f("hasBone", (GLfloat)GL_TRUE);
+        }
         //if (pCurrentMeshObject->instanceName == "man1")
         //{
         //    g_pTheLightManager->plight[7]->position = glm::vec4(pCurrentMeshObject->position, 1) + glm::vec4(-0.4f, 1.4f, 0, 0);
@@ -560,6 +570,10 @@ void updateInstanceObj(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
         if (pCurrentMeshObject->isIslandModel)
         {
             pShaderManager->setShaderUniform1f("bIsIlandModel", (GLfloat)GL_FALSE);
+        }
+        if (pCurrentMeshObject->hasBone)
+        {
+            pShaderManager->setShaderUniform1f("hasBone", (GLfloat)GL_FALSE);
         }
     }
 #if MOVINGTEXTURE
@@ -759,3 +773,5 @@ void setFBO2(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
     
     //updateInstanceObj(pShaderManager, pVAOManager);
 }
+
+
