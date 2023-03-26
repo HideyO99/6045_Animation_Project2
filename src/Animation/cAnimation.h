@@ -3,6 +3,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <string>
 #include <vector>
+#include <map>
 
 struct BoneInfo
 {
@@ -84,6 +85,20 @@ struct AnimationData
 	std::vector<PositionKeyFrame> PositionKeyFrames;
 	std::vector<ScaleKeyFrame> ScaleKeyFrames;
 	std::vector<RotationKeyFrame> RotationKeyFrames;
+	float Duration;
+};
+
+struct BoneAnimationData
+{
+	std::string Name;
+	
+	std::vector<BoneInfo> boneInfoVec;
+	std::map<std::string, int> boneNameToIdMap;
+
+	std::vector<AnimationData*> Channels;
+	//std::vector<PositionKeyFrame> PositionKeyFrames;
+	//std::vector<ScaleKeyFrame> ScaleKeyFrames;
+	//std::vector<RotationKeyFrame> RotationKeyFrames;
 	float Duration;
 };
 

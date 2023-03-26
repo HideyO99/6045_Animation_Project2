@@ -141,6 +141,9 @@
     <ClCompile Include="src\boneShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GUI\cGUI.h">
@@ -228,6 +231,9 @@
       <Filter>MeshObj</Filter>
     </ClInclude>
     <ClInclude Include="src\boneShader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\time.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -42,6 +42,7 @@ public:
 	bool setInstanceObjVisible(std::string meshObjName, bool value);
 	bool setInstanceObjLighting(std::string meshObjName, bool value);
 	bool setInstanceObjSpecularPower(std::string meshObjName, glm::vec4 value);
+	bool setInstanceObjBone(std::string meshObjName);
 
 	bool setInstanceObjPosition(std::string meshObjName, glm::vec4 value);
 

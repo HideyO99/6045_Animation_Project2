@@ -3,6 +3,8 @@
 
 extern cTextureManager* g_pTextureManager;
 
+void CastToGLM(const aiMatrix4x4& in, glm::mat4& out);
+
 cVAOManager::cVAOManager()
 {
 }
@@ -302,6 +304,7 @@ bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo, cM
 	{
 		unsigned int numBone = mesh->mNumBones;
 		meshObj->hasBone = true;
+		//meshObj->BoneModelMatrices[0] = glm::mat4(1.f);
 		for (int i_bones = 0; i_bones < numBone; i_bones++)
 		{
 			const aiBone* bone = mesh->mBones[i_bones];
@@ -315,7 +318,9 @@ bool cVAOManager::loadMesh(const aiMesh* mesh, cModelDrawInfo* modelDrawInfo, cM
 				BoneInfo boneInfo;
 				boneInfo.name = boneName;
 				meshObj->boneInfoVec.push_back(boneInfo);
+				CastToGLM(bone->mOffsetMatrix, meshObj->boneInfoVec[boneIDx].boneOffset);
 				meshObj->boneNameToIdMap.emplace(boneName, boneIDx);
+				meshObj->BoneModelMatrices.push_back(glm::mat4(1.f));
 			}
 			else
 			{
@@ -589,6 +594,19 @@ bool cVAOManager::setInstanceObjSpecularPower(std::string meshObjName, glm::vec4
 	return true;
 }
 
+bool cVAOManager::setInstanceObjBone(std::string meshObjName)
+{
+	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
+	if (itCurrentMesh == mapInstanceNametoMeshObj.end())
+	{
+		return false;
+	}
+	cMeshObj* pCurrentMeshObject = itCurrentMesh->second;
+	//pCurrentMeshObject->BoneModelMatrices
+
+	return true;
+}
+
 bool cVAOManager::setInstanceObjPosition(std::string meshObjName, glm::vec4 value)
 {
 	std::map<std::string, cMeshObj* >::iterator itCurrentMesh = mapInstanceNametoMeshObj.find(meshObjName);
@@ -828,4 +846,13 @@ bool cVAOManager::setTorchTexture(std::string meshObjName, std::string textureFi
 		}
 	}
 	return true;
+}
+
+
+void CastToGLM(const aiMatrix4x4& in, glm::mat4& out)
+{
+	out = glm::mat4(in.a1, in.b1, in.c1, in.d1,
+		in.a2, in.b2, in.c2, in.d2,
+		in.a3, in.b3, in.c3, in.d3,
+		in.a4, in.b4, in.c4, in.d4);
 }

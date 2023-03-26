@@ -26,6 +26,11 @@ bool AnimationManager::AddAnimation(const std::string& name, AnimationData anima
 	return true;
 }
 
+bool AnimationManager::AddBoneAnimation(const std::string& name, AnimationData animation)
+{
+	return false;
+}
+
 void AnimationManager::AnimationUpdate(bool& playCMD,float dt)
 {
 	bool isPlaying = false;
@@ -133,6 +138,114 @@ void AnimationManager::AnimationUpdate(bool& playCMD,float dt)
 	}
 	playCMD = isPlaying;
 
+}
+
+void AnimationManager::BoneAnimationUpdate(bool& playCMD, float dt)
+{
+	bool isPlaying = false;
+
+	for (size_t i = 0; i < animationOBJList.size(); i++)
+	{
+		cMeshObj* AnimationOBJ = animationOBJList[i];
+
+		cAnimation& animation = AnimationOBJ->Animation;
+		std::map<std::string, AnimationData>::iterator animation_it = AnimationList.find(animation.tag);
+
+		if (animation_it != AnimationList.end())
+		{
+			const AnimationData& animationData = animation_it->second;
+
+			if (animation.IsPlaying && animation.Speed != 0.f)
+			{
+				isPlaying = true;
+				animation.AnimationTime += dt * animation.Speed;
+				if (animation.AnimationTime > animationData.Duration)
+				{
+					if (animation.IsLooping)
+					{
+						if (animation.Speed > 0)
+						{
+							animation.AnimationTime = 0.0f;
+						}
+						else
+						{
+							animation.AnimationTime = animationData.Duration;
+						}
+
+					}
+					else if (continuePlay)
+					{
+						unsigned nextSeq = animation.curSeq + 1;
+						if (nextSeq < animation.seq.size())
+						{
+							animation.tag = animation.seq[nextSeq].c_str();
+							animation.AnimationTime = 0.0f;
+							animation.curSeq++;
+							std::cout << "play animation sequence " << animation.curSeq + 1 << std::endl;
+							continue;
+						}
+						else
+						{
+							animation.AnimationTime = animationData.Duration;
+							animation.IsPlaying = false;
+							isPlaying = false;
+						}
+					}
+					else
+					{
+						animation.AnimationTime = animationData.Duration;
+						animation.IsPlaying = false;
+						isPlaying = false;
+
+					}
+				}
+				else if (animation.AnimationTime < 0.f)
+				{
+					if (animation.IsLooping)
+					{
+						if (animation.Speed < 0)
+						{
+							animation.AnimationTime = animationData.Duration;
+						}
+						else
+						{
+							animation.AnimationTime = 0.f;
+						}
+
+					}
+					else if (continuePlay)
+					{
+						unsigned nextSeq = animation.curSeq - 1;
+						if (nextSeq < animation.seq.size())
+						{
+							animation.tag = animation.seq[nextSeq].c_str();
+							animation.AnimationTime = animationData.Duration;
+							animation.curSeq--;
+							std::cout << "play animation sequence " << animation.curSeq + 1 << std::endl;
+							continue;
+						}
+						else
+						{
+							animation.AnimationTime = 0.f;
+							animation.IsPlaying = false;
+							isPlaying = false;
+						}
+					}
+					else
+					{
+						animation.AnimationTime = 0.f;
+						animation.IsPlaying = false;
+						isPlaying = false;
+					}
+				}
+
+				AnimationOBJ->position = GetAnimationPosition(animationData, animation.AnimationTime);
+				AnimationOBJ->scale = GetAnimationScale(animationData, animation.AnimationTime);
+				AnimationOBJ->rotation = glm::eulerAngles(GetAnimationRotation(animationData, animation.AnimationTime));
+			}
+		}
+	}
+	playCMD = isPlaying;
 }
 
 void AnimationManager::play(bool isPlay)

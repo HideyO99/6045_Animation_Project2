@@ -43,23 +43,29 @@ void main()
 	    boneTransform += BoneMatrices[int(vBoneID[2])] * vBoneWeight[2];
 	    boneTransform += BoneMatrices[int(vBoneID[3])] * vBoneWeight[3];
 	    vec4 position = boneTransform * vPosition;
-        gl_Position = mMVP * position; 
-        fColor = vec4(vBoneID[0],0,0,1.f);
+	    //vec4 position =  vPosition;
+        gl_Position = mMVP * vec4(position.xyz, 1.0f); 
+        //fColor = vec4(vBoneID[0],0,0,1.f);
+
+        fVertWorldLocation.xyz = (mModel * vec4(position.xyz, 1.0f)).xyz;
+	    fVertWorldLocation.w = 1.0f;
     }
     else
     {
 
         gl_Position = mMVP * vec4(vertPosition, 1.0); 
-        fColor = vColour;
+        //fColor = vColour;
+        fVertWorldLocation.xyz = (mModel * vec4(vertPosition, 1.0f)).xyz;
+	    fVertWorldLocation.w = 1.0f;
     }
-    fVertWorldLocation.xyz = (mModel * vec4(vertPosition, 1.0f)).xyz;
-	fVertWorldLocation.w = 1.0f;
+//    fVertWorldLocation.xyz = (mModel * vec4(vertPosition, 1.0f)).xyz;
+//	fVertWorldLocation.w = 1.0f;
 
     fNormal.xyz = normalize(mModelInverseTranspose * vec4(vNormal.xyz, 1.0f)).xyz;
 	fNormal.w = 1.0f;
     //fNormal = vec4(vNormal.xyz, 1.0);
     //fColor = vec4(vColour.rgb/0xff,1.0f);
-    //fColor = vColour;
+    fColor = vColour;
 //    fColor = vec4(vBoneID[0],vBoneID[1],vBoneID[2],1.f);
     fUVx2 = vUVx2;
     fTangent = vTangent;
