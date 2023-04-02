@@ -3,7 +3,7 @@ Project # 2: Bone Animation
 Create by Siraphong Chinsaengchai
 
 Git url:
-https://github.com/HideyO99/6045_Project1.git
+https://github.com/HideyO99/6045_Animation_Project2.git
 
 Note!! :
 Please compile in x64 platform and run 
