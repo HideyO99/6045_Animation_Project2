@@ -327,11 +327,13 @@ int main(void)
     //result = pVAOManager->setInstanceObjPosition("barrel1", glm::vec4(-12.5f, 2.5f, -15.f, 1.f));
 
     result = pVAOManager->setInstanceObjScale("man1", 5.0f);
-    //result = pVAOManager->setTexture("man1", "ply_tex_20308190_gacha.png", 0);
+    result = pVAOManager->setTexture("man1", "ply_tex_20308190_gacha.png", 0);
     result = pVAOManager->setInstanceObjLighting("man1", false);
+    //result = pVAOManager->setUseRGBColorFlag("man1", true);
 
     result = pVAOManager->setInstanceObjPosition("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
     result = pVAOManager->setInstanceObjLighting("boss", false);
+    result = pVAOManager->setInstanceObjVisible("boss", false);
     //result = pVAOManager->set("boss", glm::vec4(-2.3f, 1.f, 0.f, 1.f));
     g_MeshBoss = pVAOManager->findMeshObjAddr("boss");
     light0Setup(); // Dir light
@@ -818,7 +820,7 @@ void createAnimation(cVAOManager* pVAOManager)
     //Sequence 1
     AnimationData seq1_bone1;
     seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(3.f, 1.f, 3.f), 0.f, None, boneID_1));
-    seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 10.f, 0.f), 5.f, None, boneID_1));
+    seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 5.f, None, boneID_1));
     seq1_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(1.f), 0.f, None, boneID_1));
     seq1_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 0.f), 0.f, None, boneID_1));
     seq1_bone1.Duration = 5.f;
