@@ -21,6 +21,7 @@ extern float fov;
 extern cFBO* g_FBO_01;
 extern AnimationManager* g_pAnimationManager;
 extern bool g_PlayAnimation;
+extern unsigned int g_AnimationSeq;
 
 void error_callback(int error, const char* description)
 {
@@ -40,53 +41,88 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         //::g_cameraEye.x -= CAMERA_MOVE_SPEED;
         //::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
-        g_MeshBoss->position.x -= 0.1;
+        //g_MeshBoss->position.x -= 0.1;
     }
     if (key == GLFW_KEY_RIGHT)
     {
         //::g_cameraEye.x += CAMERA_MOVE_SPEED;
         //::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
-        g_MeshBoss->position.x += 0.1;
+        //g_MeshBoss->position.x += 0.1;
     }
     if (key == GLFW_KEY_UP)
     {
         //::g_cameraEye.z -= CAMERA_MOVE_SPEED;
         //::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
-        g_MeshBoss->position.z -= 0.1;
+        //g_MeshBoss->position.z -= 0.1;
     }
     if (key == GLFW_KEY_DOWN)
     {
         //::g_cameraEye.z += CAMERA_MOVE_SPEED;
         //::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
-        g_MeshBoss->position.z += 0.1;
+        //g_MeshBoss->position.z += 0.1;
     }
     if (key == GLFW_KEY_A)
     {
-        ::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+        //::g_cameraEye += (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
     }
     if (key == GLFW_KEY_D)
     {
-        ::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
+        //::g_cameraEye -= (glm::normalize(glm::cross(g_upVector, (::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED)));
     }
     if (key == GLFW_KEY_W)
     {
-        ::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+        //::g_cameraEye += ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
     }
     if (key == GLFW_KEY_S)
     {
-        ::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
+        //::g_cameraEye -= ((::g_cameraFront * glm::vec3(1, 0, 1)) * CAMERA_MOVE_SPEED);
     }
     if (key == GLFW_KEY_Q)
     {
-        ::g_cameraEye.y -= CAMERA_MOVE_SPEED;
+        //::g_cameraEye.y -= CAMERA_MOVE_SPEED;
     }
     if (key == GLFW_KEY_E)
     {
-        ::g_cameraEye.y += CAMERA_MOVE_SPEED;
+        //::g_cameraEye.y += CAMERA_MOVE_SPEED;
     }
     if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
     {
-        //toggleblur = !toggleblur;
+        g_AnimationSeq = 0;
+        g_pAnimationManager->setSequence(g_AnimationSeq);
+
+    }
+    if (key == GLFW_KEY_2 && action == GLFW_RELEASE)
+    {
+        g_AnimationSeq = 1;
+        g_pAnimationManager->setSequence(g_AnimationSeq);
+    }
+    if (key == GLFW_KEY_3 && action == GLFW_RELEASE)
+    {
+        g_AnimationSeq = 2;
+        g_pAnimationManager->setSequence(g_AnimationSeq);
+    }
+    if (key == GLFW_KEY_4 && action == GLFW_RELEASE)
+    {
+        g_AnimationSeq = 3;
+        g_pAnimationManager->setSequence(g_AnimationSeq);
+    }
+    if (key == GLFW_KEY_5 && action == GLFW_RELEASE)
+    {
+        g_AnimationSeq = 4;
+        g_pAnimationManager->setSequence(g_AnimationSeq);
+    }
+    if (key == GLFW_KEY_C && action == GLFW_RELEASE)
+    {
+        g_pAnimationManager->continuePlay = !g_pAnimationManager->continuePlay;
+        if (g_pAnimationManager->continuePlay)
+        {
+            std::cout << "coninue play enable" << std::endl;
+        }
+        else
+        {
+            std::cout << "coninue play disable" << std::endl;
+        }
+
     }
     if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
     {
