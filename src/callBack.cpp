@@ -4,6 +4,7 @@
 #include "MeshObj/cMeshObj.h"
 #include <iostream>
 #include "FBO/cFBO.h"
+#include "Animation/AnimationManager.h"
 
 extern cMeshObj* g_MeshBoss;
 extern glm::vec3 g_cameraEye;
@@ -18,6 +19,8 @@ extern float lastX;
 extern float lastY;
 extern float fov;
 extern cFBO* g_FBO_01;
+extern AnimationManager* g_pAnimationManager;
+extern bool g_PlayAnimation;
 
 void error_callback(int error, const char* description)
 {
@@ -83,14 +86,23 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
     {
-        toggleblur = !toggleblur;
+        //toggleblur = !toggleblur;
     }
     if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
     {
         //::g_cameraEye = glm::vec3(-5.5f, -3.4f, 15.0f);
         //::g_cameraEye = glm::vec3(0.0, 100.0, 300.0f);
         //::g_cameraTarget = glm::vec3(5.0f, 0.0f, 0.0f);
-        bIsWalkAround = !bIsWalkAround;
+        g_PlayAnimation = !g_PlayAnimation;
+        g_pAnimationManager->play(g_PlayAnimation);
+        if (g_PlayAnimation)
+        {
+            std::cout << "Play Animation" << std::endl;
+        }
+        else
+        {
+            std::cout << "Pause Animation" << std::endl;
+        }
 
     }
 }

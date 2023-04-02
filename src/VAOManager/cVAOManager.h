@@ -6,6 +6,7 @@
 #include <map>
 #include <fstream>
 #include "../MeshObj/cMeshObj.h"
+#include "../BoneHierarchy.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

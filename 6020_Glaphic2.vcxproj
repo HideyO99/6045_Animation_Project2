@@ -184,6 +184,7 @@
     <ClInclude Include="dev\inc\imgui\imstb_truetype.h" />
     <ClInclude Include="src\Animation\AnimationManager.h" />
     <ClInclude Include="src\Animation\cAnimation.h" />
+    <ClInclude Include="src\BoneHierarchy.h" />
     <ClInclude Include="src\boneShader.h" />
     <ClInclude Include="src\cAssimpModel.h" />
     <ClInclude Include="src\FBO\cFBO.h" />

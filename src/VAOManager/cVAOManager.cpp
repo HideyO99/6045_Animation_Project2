@@ -216,6 +216,9 @@ bool cVAOManager::loadFBXFile(std::map<std::string, std::string>::iterator i_map
 	const aiScene* scene = m_Importer.ReadFile(i_mapModel->second, ASSIMP_LOAD_FLAGS);
 
 	aiNode* node = scene->mRootNode;
+
+	//BoneHierarchy* boneHierarchy = new BoneHierarchy();
+
 	for (int i = 0; i < node->mNumChildren; i++)
 	{
 		aiNode* child = node->mChildren[i];

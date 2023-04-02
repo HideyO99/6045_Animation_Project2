@@ -10,9 +10,9 @@ public:
 	~AnimationManager();
 
 	bool AddAnimation(const std::string& name, AnimationData animation);
-	bool AddBoneAnimation(const std::string& name, AnimationData animation);
+	//bool AddBoneAnimation(const std::string& name, BoneAnimationData boneanimation);
 	void AnimationUpdate(bool& playCMD,float dt);
-	void BoneAnimationUpdate(bool& playCMD, float dt);
+	//void BoneAnimationUpdate(bool& playCMD, float dt);
 	void play(bool isPlay);
 	void setSpeed(float speedX);
 	void setSequence(unsigned int& sequence);
@@ -31,8 +31,10 @@ private:
 	glm::vec3 GetAnimationScale(const AnimationData& animation, float time);
 	glm::quat GetAnimationRotation(const AnimationData& animation, float time);
 
+	glm::mat4 CreateModelMatrix(const glm::mat4& parentModelMatrix, const glm::vec3& translate, const glm::vec3& scale, const glm::quat& rotate);
+
 	std::map<std::string, AnimationData> AnimationList;
-	std::map<std::string, BoneAnimationData> BoneAnimationList;
+	//std::map<std::string, BoneAnimationData> BoneAnimationList;
 	glm::mat4 m_GlobalInverseTransform;
 };
 

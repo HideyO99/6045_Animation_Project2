@@ -205,7 +205,7 @@ int main(void)
     shaderID = pShaderManager->getIDfromName("Shader01");
     glUseProgram(shaderID);
 
-    //todo lighting
+    //lighting
     ::g_pTheLightManager = new cLightManager();
 
 
@@ -796,11 +796,17 @@ void setFBO2(cShaderManager* pShaderManager, cVAOManager* pVAOManager)
 
 void createAnimation(cVAOManager* pVAOManager)
 {
+    //todo create bone animation
     cMeshObj* meshObj = pVAOManager->findMeshObjAddr("man1");
     //AnimationData* animData = new AnimationData();
     //BoneAnimationData bone1 = 
    // meshObj->BoneAnimation
-    meshObj->Animation.tag = "PosLerpNoEasing";
+    int boneID_1 = meshObj->findBoneIDfromName("UpperLeg_L");
+    int boneID_2 = meshObj->findBoneIDfromName("UpperLeg_R");
+    int boneID_3 = meshObj->findBoneIDfromName("UpperArm_L");
+    int boneID_4 = meshObj->findBoneIDfromName("UpperArm_R");
+    int boneID_5 = meshObj->findBoneIDfromName("Head");
+    meshObj->Animation.tag = "Sequence_1";
     meshObj->Animation.curSeq = 0;
     meshObj->Animation.Speed = 1.f;
     meshObj->Animation.IsLooping = true;
@@ -811,38 +817,64 @@ void createAnimation(cVAOManager* pVAOManager)
 
     //Sequence 1
     AnimationData seq1_bone1;
-    seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(3.f, 1.f, 3.f), 0.f, None));
-    seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 5.f, None));
-    seq1_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(1.f), 0.f, None));
-    seq1_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 0.f), 0.f, None));
+    seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(3.f, 1.f, 3.f), 0.f, None, boneID_1));
+    seq1_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 10.f, 0.f), 5.f, None, boneID_1));
+    seq1_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(1.f), 0.f, None, boneID_1));
+    seq1_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 0.f), 0.f, None, boneID_1));
     seq1_bone1.Duration = 5.f;
-    g_pAnimationManager->AddBoneAnimation("UpperArm_L_seq1", seq1_bone1);
-    meshObj->Animation.seq.push_back("PosLerpNoEasing");
+    g_pAnimationManager->AddAnimation("Sequence_1", seq1_bone1);
+    meshObj->Animation.seq.push_back("Sequence_1");
 
     //sequence 2
-    AnimationData seq2_bone1;
-    seq2_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 0.f, None));
-    seq2_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-25.f, 1.f, -25.f), 5.f, None));
-    seq2_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(1.f), 0.f, None));
-    seq2_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(10.f), 5.f, None));
-    seq2_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 0.f), 0.f, None));
-    seq2_bone1.Duration = 5.f;
-    g_pAnimationManager->AddBoneAnimation("UpperArm_L_seq2", seq2_bone1);
-    meshObj->Animation.seq.push_back("ScaleLerpNoEasing");
+    AnimationData seq2_bone2;
+    seq2_bone2.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 0.f, None, boneID_2));
+    seq2_bone2.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-25.f, 1.f, -25.f), 5.f, None, boneID_2));
+    seq2_bone2.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(1.f), 0.f, None, boneID_2));
+    seq2_bone2.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(10.f), 5.f, None, boneID_2));
+    seq2_bone2.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 0.f), 0.f, None, boneID_2));
+    seq2_bone2.Duration = 5.f;
+    g_pAnimationManager->AddAnimation("Sequence_2", seq2_bone2);
+    meshObj->Animation.seq.push_back("Sequence_2");
 
     //sequence 3
-    AnimationData seq3_bone1;
-    seq3_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-25.f, 1.f, -25.f), 0.f, None));
-    seq3_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-12.5f, 25.f, -12.5f), 2.5f, None));
-    seq3_bone1.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 5.f, None));
-    seq3_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(10.f), 0.f, None));
-    seq3_bone1.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(5.f), 5.f, None));
-    seq3_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 0.f, None));
-    seq3_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 1.f), 2.5f, None));
-    seq3_bone1.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 5.f, None));
-    seq3_bone1.Duration = 5.f;
-    g_pAnimationManager->AddAnimation("UpperArm_L_seq3", seq3_bone1);
-    meshObj->Animation.seq.push_back("RotationSlerpNoEasing");
+    AnimationData seq3_bone3;
+    seq3_bone3.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-25.f, 1.f, -25.f), 0.f, None,boneID_1));
+    seq3_bone3.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-12.5f, 25.f, -12.5f), 2.5f, None, boneID_1));
+    seq3_bone3.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 5.f, None, boneID_1));
+    seq3_bone3.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(10.f), 0.f, None, boneID_1));
+    seq3_bone3.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(5.f), 5.f, None, boneID_1));
+    seq3_bone3.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 0.f, None, boneID_1));
+    seq3_bone3.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 1.f), 2.5f, None, boneID_1));
+    seq3_bone3.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 5.f, None, boneID_1));
+    seq3_bone3.Duration = 5.f;
+    g_pAnimationManager->AddAnimation("Sequence_3", seq3_bone3);
+    meshObj->Animation.seq.push_back("Sequence_3");
+
+    AnimationData seq4_bone4;
+    seq4_bone4.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-25.f, 1.f, -25.f), 0.f, None, boneID_1));
+    seq4_bone4.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-12.5f, 25.f, -12.5f), 2.5f, None, boneID_1));
+    seq4_bone4.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 5.f, None, boneID_1));
+    seq4_bone4.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(10.f), 0.f, None, boneID_1));
+    seq4_bone4.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(5.f), 5.f, None, boneID_1));
+    seq4_bone4.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 0.f, None, boneID_1));
+    seq4_bone4.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 1.f), 2.5f, None, boneID_1));
+    seq4_bone4.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 5.f, None, boneID_1));
+    seq4_bone4.Duration = 5.f;
+    g_pAnimationManager->AddAnimation("Sequence_4", seq4_bone4);
+    meshObj->Animation.seq.push_back("Sequence_4");
+
+    AnimationData seq5_bone5;
+    seq5_bone5.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-25.f, 1.f, -25.f), 0.f, None, boneID_1));
+    seq5_bone5.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(-12.5f, 25.f, -12.5f), 2.5f, None, boneID_1));
+    seq5_bone5.PositionKeyFrames.push_back(PositionKeyFrame(glm::vec3(0.f, 1.f, 0.f), 5.f, None, boneID_1));
+    seq5_bone5.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(10.f), 0.f, None, boneID_1));
+    seq5_bone5.ScaleKeyFrames.push_back(ScaleKeyFrame(glm::vec3(5.f), 5.f, None, boneID_1));
+    seq5_bone5.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 0.f, None, boneID_1));
+    seq5_bone5.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(0.f, 0.f, 0.f, 1.f), 2.5f, None, boneID_1));
+    seq5_bone5.RotationKeyFrames.push_back(RotationKeyFrame(glm::quat(1.f, 0.f, 0.f, 0.f), 5.f, None, boneID_1));
+    seq5_bone5.Duration = 5.f;
+    g_pAnimationManager->AddAnimation("Sequence_5", seq5_bone5);
+    meshObj->Animation.seq.push_back("Sequence_5");
 }
 
 void updateByFrameRate()
@@ -864,7 +896,8 @@ void updateByFrameRate()
         //obj_it->second->velocity.z = (obj_it->second->position.z - obj_it->second->prevPosition.z) / elapsedTime;
 
         //obj_it->second->update();
-
+        
+        //todo update bone animation
         g_pAnimationManager->AnimationUpdate(g_PlayAnimation, elapsedTime);
         //g_physicSys.updateSystem(elapsedTime);
     }

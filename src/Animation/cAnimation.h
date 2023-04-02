@@ -57,27 +57,30 @@ enum EasingType
 
 struct PositionKeyFrame
 {
-	PositionKeyFrame(glm::vec3 Pos, float time, EasingType type = None) : Pos(Pos), time(time), type(type) {}
+	PositionKeyFrame(glm::vec3 Pos, float time, EasingType type = None, int boneID = 0) : Pos(Pos), time(time), type(type), boneID(boneID) {}
 	glm::vec3 Pos;
 	float time;
 	EasingType type;
+	int boneID;
 };
 
 struct ScaleKeyFrame
 {
-	ScaleKeyFrame(glm::vec3 Scale, float time, EasingType type = None) : Scale(Scale), time(time), type(type) {}
+	ScaleKeyFrame(glm::vec3 Scale, float time, EasingType type = None, int boneID = 0) : Scale(Scale), time(time), type(type), boneID(boneID){}
 	glm::vec3 Scale;
 	float time;
 	EasingType type;
+	int boneID;
 };
 
 struct RotationKeyFrame
 {
-	RotationKeyFrame(glm::quat Rotation, float time, EasingType type = None) : Rotation(Rotation), time(time), type(type) {}
+	RotationKeyFrame(glm::quat Rotation, float time, EasingType type = None, int boneID = 0) : Rotation(Rotation), time(time), type(type), boneID(boneID){}
 	glm::quat Rotation;
 	float time;
 	//bool useSlerp;
 	EasingType type;
+	int boneID;
 };
 
 struct AnimationData
@@ -88,19 +91,21 @@ struct AnimationData
 	float Duration;
 };
 
-struct BoneAnimationData
-{
-	std::string Name;
-	
-	std::vector<BoneInfo> boneInfoVec;
-	std::map<std::string, int> boneNameToIdMap;
-
-	std::vector<AnimationData*> Channels;
-	//std::vector<PositionKeyFrame> PositionKeyFrames;
-	//std::vector<ScaleKeyFrame> ScaleKeyFrames;
-	//std::vector<RotationKeyFrame> RotationKeyFrames;
-	float Duration;
-};
+//struct BoneAnimationData
+//{
+//	std::string Name;
+//
+//	BoneHierarchy* boneHierarchy;
+//	
+//	std::vector<BoneInfo> boneInfoVec;
+//	std::map<std::string, int> boneNameToIdMap;
+//
+//	std::vector<AnimationData*> Channels;
+//	//std::vector<PositionKeyFrame> PositionKeyFrames;
+//	//std::vector<ScaleKeyFrame> ScaleKeyFrames;
+//	//std::vector<RotationKeyFrame> RotationKeyFrames;
+//	float Duration;
+//};
 
 
 class cAnimation

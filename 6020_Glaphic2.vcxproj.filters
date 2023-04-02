@@ -236,6 +236,9 @@
     <ClInclude Include="src\time.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\BoneHierarchy.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Shader\fragmentShader.glsl">
